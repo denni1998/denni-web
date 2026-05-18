@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buat Laporan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="scanner.js"></script>
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="topbar">
+        <div>
+          <h1>Buat Laporan</h1>
+          <p class="subtitle">Isi data perbaikan lalu kirim ke spreadsheet.</p>
+        </div>
+        <button class="icon-btn" onclick="go('home')">←</button>
+      </div>
+
+      <div class="info">
+        <div id="tanggal"></div>
+        <div id="mekanik"></div>
+      </div>
+
+      <label>Nomor Mesin</label>
+      <div class="field">
+        <span class="field-icon">🏷️</span>
+        <input id="mesin" placeholder="Input / scan nomor mesin">
+      </div>
+
+      <button type="button" class="btn-secondary" onclick="startScanner()">📷 Scan Barcode</button>
+      <div id="reader" class="scanBox"></div>
+
+      <label>Lokasi</label>
+      <select id="lokasi"></select>
+
+      <label>Waktu Mulai</label>
+      <input type="time" id="mulai">
+
+      <label>Waktu Selesai</label>
+      <input type="time" id="selesai">
+
+      <label>Total Waktu</label>
+      <div class="field">
+        <span class="field-icon">⏱️</span>
+        <input id="total" readonly placeholder="Otomatis terhitung">
+      </div>
+
+      <label>Problem</label>
+      <select id="problem"></select>
+
+      <label>Tindakan</label>
+      <div class="field">
+        <span class="field-icon">✅</span>
+        <input id="tindakan" readonly placeholder="Otomatis terisi">
+      </div>
+
+      <label>Catatan</label>
+      <textarea id="catatan" placeholder="Tambahkan keterangan bila perlu"></textarea>
+
+      <button id="kirimBtn" type="button" onclick="kirim()">Kirim Laporan</button>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const user = getUser();
+    if(!user) location.href = "index.html";
+
+    document.getElementById("mekanik").innerText = "👨‍🔧 Mekanik: " + (user.NAMA || user.nama || "");
+
+    const now = new Date();
+    const tglLengkap = now.toLocaleDateString("id-ID", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+
+    document.getElementById("tanggal").innerText = "📅 Tanggal: " + tglLengkap;
+
+    function hitungTotal(){
+      if(!mulai.value || !selesai.value) return;
+
+      const m = new Date("1970-01-01T" + mulai.value + ":00");
+      const s = new Date("1970-01-01T" + selesai.value + ":00");
+      const diff = (s - m) / 60000;
+
+      if(diff < 0){
+        alert("Waktu selesai tidak boleh lebih kecil dari waktu mulai");
+        selesai.value = "";
+        total.value = "";
+        tindakan.value = "";
+        return;
+      }
+
+      total.value = diff + " menit";
+      tindakan.value = diff > 15 ? "Pergantian Sparepart" : "Perbaikan";
+    }
+
+    mulai.addEventListener("change", hitungTotal);
+    selesai.addEventListener("change", hitungTotal);
+
+    async function kirim(){
+      const btn = document.getElementById("kirimBtn");
+      const data = {
+        timestamp: new Date().toISOString(),
+        tanggal: now.toLocaleDateString("id-ID"),
+        nama: user.NAMA || user.nama || "",
+        mesin: mesin.value.trim(),
+        lokasi: lokasi.value,
+        mulai: mulai.value,
+        selesai: selesai.value,
+        total: total.value,
+        problem: problem.value,
+        tindakan: tindakan.value,
+        catatan: catatan.value.trim()
+      };
+
+      if(!data.mesin || !data.lokasi || !data.mulai || !data.selesai || !data.problem || !data.total){
+        alert("Data belum lengkap");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Menyimpan...";
+
+      try{
+        await saveLaporan(data);
+        alert("Laporan tersimpan ke HP dan Google Spreadsheet");
+        location.href = "home.html";
+      }catch(e){
+        console.error(e);
+        alert("Tersimpan di HP, tapi gagal masuk spreadsheet: " + e.message);
+        location.href = "home.html";
+      }
+    }
+
+    async function loadLokasi(){
+      const url = "https://opensheet.elk.sh/1q5ZbW1dyHQc2FnNrCnObzbjxdmy0zqTWGvDRbGRkrww/lokasi";
+      const res = await fetch(url);
+      const data = await res.json();
+      const lokasiEl = document.getElementById("lokasi");
+      lokasiEl.innerHTML = '<option value="">Pilih Lokasi</option>';
+      data.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.LOKASI;
+        opt.text = row.LOKASI;
+        lokasiEl.appendChild(opt);
+      });
+      new TomSelect("#lokasi");
+    }
+
+    async function loadProblem(){
+      const url = "https://opensheet.elk.sh/1q5ZbW1dyHQc2FnNrCnObzbjxdmy0zqTWGvDRbGRkrww/problem";
+      const res = await fetch(url);
+      const data = await res.json();
+      const problemEl = document.getElementById("problem");
+      problemEl.innerHTML = '<option value="">Pilih Problem</option>';
+      data.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.PROBLEM;
+        opt.text = row.PROBLEM;
+        problemEl.appendChild(opt);
+      });
+      new TomSelect("#problem");
+    }
+
+    window.onload = function(){
+      loadLokasi();
+      loadProblem();
+    };
+  </script>
+</body>
+</html>

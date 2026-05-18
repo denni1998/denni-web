@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Mekanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="brand">
+        <div class="logo">🛠️</div>
+        <div>
+          <h1>Mekanik App</h1>
+          <p class="subtitle">Login untuk membuat laporan perbaikan mesin.</p>
+        </div>
+      </div>
+
+      <label>NIK</label>
+      <div class="field">
+        <span class="field-icon">👤</span>
+        <input id="nik" placeholder="Masukkan NIK" autocomplete="username">
+      </div>
+
+      <label>Password</label>
+      <div class="field">
+        <span class="field-icon">🔒</span>
+        <input id="password" type="password" placeholder="Masukkan password" autocomplete="current-password">
+      </div>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+        <input type="checkbox" id="remember" style="width:auto;min-height:auto;margin:0"> Simpan login
+      </label>
+
+      <button id="loginBtn" onclick="login()">Masuk</button>
+
+      <div id="loading" style="display:none"><div class="bar"></div></div>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const saved = localStorage.getItem("rememberNik");
+    if(saved){
+      document.getElementById("nik").value = saved;
+      document.getElementById("remember").checked = true;
+    }
+    if(localStorage.getItem("user")) location.href = "home.html";
+  </script>
+</body>
+</html>

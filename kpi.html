@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPI Mekanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    :root{
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --cyan:#18e0e8;
+      --yellow:#ffd000;
+      --green:#9bd64d;
+      --overtime:#fff200;
+      --bg:#eef3fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:rgba(15,23,42,.28);
+      --shadow:0 18px 45px rgba(15,23,42,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Arial,sans-serif;
+      color:var(--text);
+      background:radial-gradient(circle at top left,rgba(37,99,235,.14),transparent 34%),var(--bg);
+    }
+    .page{max-width:1540px;margin:0 auto;padding:22px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      background:var(--card);border-radius:24px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow)
+    }
+    h1{margin:0;font-size:clamp(24px,3vw,40px);font-weight:900;letter-spacing:-.04em}
+    .subtitle{margin:6px 0 0;color:var(--muted);font-weight:600}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .select,.btn{
+      height:44px;border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:0 14px;
+      background:#fff;font:inherit;font-weight:800;color:var(--text)
+    }
+    .select{min-width:210px}
+    .btn{cursor:pointer;background:var(--primary);color:#fff;border:0;box-shadow:0 10px 24px rgba(37,99,235,.28)}
+    .btn:hover{background:var(--primary-dark)}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .stat{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--shadow);border:1px solid rgba(15,23,42,.06)}
+    .stat-icon{font-size:26px;margin-bottom:8px}.stat-number{font-size:30px;font-weight:900;letter-spacing:-.04em}.stat-label{font-size:13px;color:var(--muted);font-weight:800;margin-top:4px}
+    .dashboard{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .panel{background:var(--card);border-radius:24px;padding:16px;box-shadow:var(--shadow);overflow:hidden}
+    .panel-title{text-align:center;font-size:clamp(22px,2.5vw,36px);font-weight:900;letter-spacing:-.04em;margin:0 0 14px;text-transform:uppercase}
+    .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+    table{width:100%;border-collapse:collapse;min-width:680px;background:#fff;font-size:16px}
+    th,td{border:1px solid var(--line);padding:8px 10px;text-align:center;white-space:nowrap}
+    th{background:var(--cyan);font-weight:900;text-transform:uppercase}
+    td:first-child,th:first-child{text-align:left}
+    .total-row td{background:var(--yellow);font-weight:900}
+    .target-row td{background:var(--green);font-weight:800}
+    .overtime-row td{background:var(--overtime);font-weight:900}
+    .chart-card{margin-top:16px;border:1px solid rgba(15,23,42,.18);border-radius:18px;padding:16px;background:#fff;min-height:360px}
+    .chart-title{text-align:center;font-weight:900;font-size:22px;margin:0 0 12px;text-transform:uppercase}
+    .chart-box{height:310px;position:relative}
+    .status{margin:14px 0;padding:14px;border-radius:16px;background:#fff8db;color:#854d0e;font-weight:800;display:none}
+    .status.show{display:block}
+    @media(max-width:1080px){.dashboard{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.page{padding:14px}.topbar{align-items:flex-start;flex-direction:column}.actions{width:100%}.select,.btn{width:100%}.summary-grid{grid-template-columns:1fr}.panel{padding:12px}.chart-card{min-height:330px}.chart-box{height:260px}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="topbar">
+      <div>
+        <h1>📊 KPI Mekanik</h1>
+        <p class="subtitle">Data live dari Google Spreadsheet sheet DATA.</p>
+      </div>
+      <div class="actions">
+        <select class="select" id="monthFilter"></select>
+        <button class="btn" onclick="loadKPI(true)">🔄 Refresh</button>
+        <button class="btn" onclick="goHome()">← Home</button>
+      </div>
+    </section>
+
+    <div id="status" class="status"></div>
+
+    <section class="summary-grid">
+      <div class="stat"><div class="stat-icon">🛠️</div><div class="stat-number" id="sumRepair">0</div><div class="stat-label">Jumlah Perbaikan</div></div>
+      <div class="stat"><div class="stat-icon">⏱️</div><div class="stat-number" id="sumRepairDown">0</div><div class="stat-label">Downtime Perbaikan</div></div>
+      <div class="stat"><div class="stat-icon">🔩</div><div class="stat-number" id="sumSparepart">0</div><div class="stat-label">Pergantian Sparepart</div></div>
+      <div class="stat"><div class="stat-icon">⏳</div><div class="stat-number" id="sumSparepartDown">0</div><div class="stat-label">Downtime Sparepart</div></div>
+    </section>
+
+    <section class="dashboard">
+      <article class="panel">
+        <h2 class="panel-title" id="repairTitle">PERFORMA</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Jenis Perbaikan</th><th>Jumlah Perbaikan</th><th>Downtime (Minute)</th></tr></thead>
+            <tbody id="repairBody"></tbody>
+          </table>
+        </div>
+        <div class="chart-card"><h3 class="chart-title">Jumlah Perbaikan</h3><div class="chart-box"><canvas id="repairChart"></canvas></div></div>
+      </article>
+
+      <article class="panel">
+        <h2 class="panel-title" id="sparepartTitle">PERFORMA</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pergantian Sparepart</th><th>Pergantian Sparepart</th><th>Downtime (Minute)</th></tr></thead>
+            <tbody id="sparepartBody"></tbody>
+          </table>
+        </div>
+        <div class="chart-card"><h3 class="chart-title">Jumlah Pergantian Sparepart</h3><div class="chart-box"><canvas id="sparepartChart"></canvas></div></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const SPREADSHEET_ID = "1q5ZbW1dyHQc2FnNrCnObzbjxdmy0zqTWGvDRbGRkrww";
+    const SHEET_NAME = "DATA";
+    const DATA_URL = `https://opensheet.elk.sh/${SPREADSHEET_ID}/${SHEET_NAME}`;
+    const TARGET_PERBAIKAN = 10;
+    const TARGET_SPAREPART = 20;
+    const CATEGORIES = [
+      "DM-01: Jahitan Loncat",
+      "DM-02: Jahitan Putus",
+      "DM-03: Kendor/kerut",
+      "DM-04: Setting C/set",
+      "DM-05: Overhoul",
+      "DM-06: Lain-lain",
+      "SU : Set up"
+    ];
+
+    let rawRows = [];
+    let repairChart = null;
+    let sparepartChart = null;
+
+    Chart.register(ChartDataLabels);
+
+    function goHome(){ window.location.href = "home.html"; }
+    function showStatus(message){ const el=document.getElementById("status"); el.textContent=message; el.classList.toggle("show",!!message); }
+    function numberFormat(n){ return Number(n || 0).toLocaleString("id-ID"); }
+    function normalizeKey(value){ return String(value || "").trim().toLowerCase().replace(/\s+/g," "); }
+    function normalizeText(value){ return String(value || "").trim().toLowerCase().replace(/\s+/g," "); }
+
+    function getValue(row, names){
+      const map = {};
+      Object.keys(row || {}).forEach(key => map[normalizeKey(key)] = row[key]);
+      for(const name of names){
+        const value = map[normalizeKey(name)];
+        if(value !== undefined && value !== null && String(value).trim() !== "") return value;
+      }
+      return "";
+    }
+
+    function parseMinutes(value){
+      // Google Visualization API kadang mengirim durasi sebagai array: [jam, menit, detik, ms].
+      if(Array.isArray(value)){
+        const h = Number(value[0] || 0);
+        const m = Number(value[1] || 0);
+        const sec = Number(value[2] || 0);
+        return Math.round((h * 60) + m + (sec / 60));
+      }
+
+      const raw = String(value || "").trim();
+      if(!raw) return 0;
+
+      // Format dari Google Sheet bisa seperti 0:08:00, 00:08:00, 8:00, atau 8 menit.
+      if(raw.includes(":")){
+        const parts = raw.split(":").map(v => Number(v));
+        if(parts.length === 3 && parts.every(v => !Number.isNaN(v))){
+          const [hours, minutes, seconds] = parts;
+          return Math.round((hours * 60) + minutes + (seconds / 60));
+        }
+        if(parts.length === 2 && parts.every(v => !Number.isNaN(v))){
+          const [minutes, seconds] = parts;
+          return Math.round(minutes + (seconds / 60));
+        }
+      }
+
+      const match = raw.match(/-?\d+(?:[.,]\d+)?/);
+      return match ? Math.round(Number(match[0].replace(",","."))) : 0;
+    }
+
+    function normalizeCategory(problem){
+      const p = normalizeText(problem);
+      if(p.includes("jahitan loncat") || p.includes("dm-01")) return "DM-01: Jahitan Loncat";
+      if(p.includes("jahitan putus") || p.includes("dm-02")) return "DM-02: Jahitan Putus";
+      if(p.includes("kendor") || p.includes("kerut") || p.includes("dm-03")) return "DM-03: Kendor/kerut";
+      if(p.includes("setting") || p.includes("c/set") || p.includes("dm-04")) return "DM-04: Setting C/set";
+      if(p.includes("overhoul") || p.includes("overhaul") || p.includes("dm-05")) return "DM-05: Overhoul";
+      if(p.includes("set up") || p.includes("setup") || p.includes("su")) return "SU : Set up";
+      return "DM-06: Lain-lain";
+    }
+
+    function parseDateFlexible(value, timestamp){
+      const raw = String(value || "").trim();
+      if(raw){
+        const iso = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if(iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+
+        // Format sheet kamu: 4/5/2026 = 4 Mei 2026.
+        const id = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+        if(id) return new Date(Number(id[3]), Number(id[2])-1, Number(id[1]));
+      }
+
+      const tsRaw = String(timestamp || "").trim();
+      const ts = tsRaw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+      if(ts) return new Date(Number(ts[3]), Number(ts[2])-1, Number(ts[1]));
+
+      const parsed = new Date(raw || tsRaw);
+      return isNaN(parsed) ? null : parsed;
+    }
+
+    function monthKeyFromRow(row){
+      const date = parseDateFlexible(getValue(row,["Tanggal","tanggal"]), getValue(row,["Timestamp","timestamp"]));
+      if(!date) return "";
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+    }
+
+    function monthLabel(key){
+      if(key === "ALL") return "SEMUA DATA";
+      const [y,m] = key.split("-").map(Number);
+      return new Date(y, m-1, 1).toLocaleDateString("id-ID", {month:"short", year:"numeric"}).replace(".","").toUpperCase();
+    }
+
+    function setupMonthOptions(rows){
+      const select = document.getElementById("monthFilter");
+      const currentValue = select.value;
+      const months = [...new Set(rows.map(monthKeyFromRow).filter(Boolean))].sort().reverse();
+      select.innerHTML = `<option value="ALL">Semua Data</option>` + months.map(key => `<option value="${key}">${monthLabel(key)}</option>`).join("");
+
+      // Default ambil bulan terbaru yang memang ada datanya, jadi tidak kosong walaupun tanggal komputer beda.
+      if(currentValue && [...months,"ALL"].includes(currentValue)){
+        select.value = currentValue;
+      }else{
+        select.value = months[0] || "ALL";
+      }
+    }
+
+    function filterByMonth(rows){
+      const value = document.getElementById("monthFilter").value || "ALL";
+      if(value === "ALL") return rows;
+      return rows.filter(row => monthKeyFromRow(row) === value);
+    }
+
+    function makeBucket(){
+      return CATEGORIES.reduce((acc, cat)=>{ acc[cat] = {count:0, downtime:0}; return acc; }, {});
+    }
+
+    function summarize(rows, type){
+      const bucket = makeBucket();
+      rows.forEach(row => {
+        const tindakan = normalizeText(getValue(row,["Tindakan","tindakan"]));
+        const isSparepart = tindakan.includes("sparepart") || tindakan.includes("spare part");
+        const isRepair = tindakan.includes("perbaikan") || tindakan.includes("repair") || !isSparepart;
+        const match = type === "sparepart" ? isSparepart : isRepair && !isSparepart;
+        if(!match) return;
+
+        const cat = normalizeCategory(getValue(row,["Problem","problem"]));
+        bucket[cat].count += 1;
+        bucket[cat].downtime += parseMinutes(getValue(row,["Total Waktu","Total waktu","total","total waktu","Downtime","downtime"]));
+      });
+      return bucket;
+    }
+
+    function renderTable(tbodyId, bucket, targetMinute, targetLabel, totalLabel){
+      const tbody = document.getElementById(tbodyId);
+      const totalCount = CATEGORIES.reduce((s,c)=>s+bucket[c].count,0);
+      const totalDown = CATEGORIES.reduce((s,c)=>s+bucket[c].downtime,0);
+      const targetDown = totalCount * targetMinute;
+      const overtime = totalDown - targetDown;
+      tbody.innerHTML = CATEGORIES.map(cat => `
+        <tr><td>${cat}</td><td>${numberFormat(bucket[cat].count)}</td><td>${numberFormat(bucket[cat].downtime)}</td></tr>
+      `).join("") + `
+        <tr class="total-row"><td>${totalLabel}</td><td>${numberFormat(totalCount)}</td><td>${numberFormat(totalDown)}</td></tr>
+        <tr class="target-row"><td>${targetLabel}</td><td>${targetMinute} MENIT</td><td>${numberFormat(targetDown)}</td></tr>
+        <tr class="overtime-row"><td></td><td>OVERTIME</td><td>${numberFormat(overtime)}</td></tr>
+      `;
+      return { totalCount, totalDown, targetDown, overtime };
+    }
+
+    function renderChart(canvasId, chartRef, bucket){
+      const ctx = document.getElementById(canvasId);
+      const values = CATEGORIES.map(cat => bucket[cat].count);
+      const total = values.reduce((a,b)=>a+b,0);
+      if(chartRef) chartRef.destroy();
+      return new Chart(ctx, {
+        type:"pie",
+        data:{ labels:CATEGORIES, datasets:[{ data:values, borderWidth:1 }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{
+            legend:{ position:"right", labels:{ boxWidth:14, font:{ size:13, weight:"600" } } },
+            tooltip:{ callbacks:{ label:(ctx)=>`${ctx.label}: ${ctx.parsed} laporan` } },
+            datalabels:{
+              color:"#111827",
+              font:{weight:"900",size:13},
+              formatter:(value)=> total ? value : "",
+              anchor:"end",
+              align:"end",
+              offset:4,
+              clamp:true
+            }
+          }
+        }
+      });
+    }
+
+    function renderDashboard(){
+      const rows = filterByMonth(rawRows);
+      const month = monthLabel(document.getElementById("monthFilter").value || "ALL");
+      document.getElementById("repairTitle").textContent = `PERFORMA ${month} (PERBAIKAN)`;
+      document.getElementById("sparepartTitle").textContent = `PERFORMA ${month} (PERGANTIAN SPAREPART)`;
+
+      const repair = summarize(rows, "repair");
+      const sparepart = summarize(rows, "sparepart");
+      const repairTotal = renderTable("repairBody", repair, TARGET_PERBAIKAN, "TARGET PERBAIKAN 10 MENIT", "TOTAL PERBAIKAN");
+      const sparepartTotal = renderTable("sparepartBody", sparepart, TARGET_SPAREPART, "TARGET PERGANTIAN SPAREPART", "TOTAL PERGANTIAN SPAREPART");
+
+      document.getElementById("sumRepair").textContent = numberFormat(repairTotal.totalCount);
+      document.getElementById("sumRepairDown").textContent = numberFormat(repairTotal.totalDown);
+      document.getElementById("sumSparepart").textContent = numberFormat(sparepartTotal.totalCount);
+      document.getElementById("sumSparepartDown").textContent = numberFormat(sparepartTotal.totalDown);
+
+      repairChart = renderChart("repairChart", repairChart, repair);
+      sparepartChart = renderChart("sparepartChart", sparepartChart, sparepart);
+
+      if(rows.length === 0){
+        showStatus("Tidak ada data pada periode yang dipilih.");
+      }else{
+        showStatus("");
+      }
+    }
+
+    async function loadKPI(forceRefresh = false){
+      showStatus("Mengambil data dari Google Spreadsheet...");
+
+      try{
+        // Jalur utama: OpenSheet.
+        // Pada beberapa browser, file HTML yang dibuka via file:// bisa kena CORS.
+        // Kalau gagal, otomatis pindah ke Google Visualization JSONP di bawah.
+        const res = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
+        if(!res.ok) throw new Error("OpenSheet HTTP " + res.status);
+        const data = await res.json();
+        rawRows = Array.isArray(data) ? data : [];
+        if(rawRows.length === 0) throw new Error("OpenSheet kosong / bukan array");
+      }catch(openSheetErr){
+        console.warn("OpenSheet gagal, pakai fallback GViz:", openSheetErr);
+        try{
+          rawRows = await loadFromGoogleVisualization();
+        }catch(gvizErr){
+          console.error(gvizErr);
+          showStatus("Data belum bisa dimuat. Cek koneksi internet, pastikan Spreadsheet publish/public, dan sheet bernama DATA.");
+          return;
+        }
+      }
+
+      setupMonthOptions(rawRows);
+      renderDashboard();
+    }
+
+    function loadFromGoogleVisualization(){
+      return new Promise((resolve, reject) => {
+        const callbackName = "__kpiGvizCallback_" + Date.now();
+        const script = document.createElement("script");
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Google Visualization timeout"));
+        }, 15000);
+
+        function cleanup(){
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if(script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[callbackName] = function(response){
+          try{
+            if(!response || response.status === "error") {
+              const msg = response && response.errors && response.errors[0] ? response.errors[0].detailed_message : "GViz error";
+              throw new Error(msg);
+            }
+
+            const table = response.table || {};
+            const cols = table.cols || [];
+            const rows = table.rows || [];
+            const headers = cols.map((col, index) => String(col.label || col.id || `COL_${index + 1}`).trim());
+
+            const data = rows.map(row => {
+              const obj = {};
+              (row.c || []).forEach((cell, index) => {
+                const header = headers[index];
+                if(!header) return;
+                obj[header] = cell ? (cell.f !== undefined ? cell.f : cell.v) : "";
+              });
+              return obj;
+            }).filter(row => Object.values(row).some(v => String(v || "").trim() !== ""));
+
+            cleanup();
+            resolve(data);
+          }catch(err){
+            cleanup();
+            reject(err);
+          }
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Script GViz gagal dimuat"));
+        };
+
+        const tqx = `out:json;responseHandler:${callbackName}`;
+        script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=${encodeURIComponent(tqx)}&tq=${encodeURIComponent("select *")}&cacheBust=${Date.now()}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    document.getElementById("monthFilter").addEventListener("change", renderDashboard);
+    loadKPI();
+  </script>
+</body>
+</html>

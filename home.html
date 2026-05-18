@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Mekanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="topbar">
+        <div>
+          <h1 id="nama">Halo</h1>
+          <p class="subtitle">Pilih menu kerja hari ini.</p>
+        </div>
+        <button class="icon-btn" onclick="logout()" title="Keluar">↗</button>
+      </div>
+
+      <div class="theme-picker" aria-label="Pilih warna tema">
+        <button class="theme-dot theme-blue" onclick="setTheme('theme-blue')" title="Biru"></button>
+        <button class="theme-dot theme-purple" onclick="setTheme('theme-purple')" title="Ungu"></button>
+        <button class="theme-dot theme-green" onclick="setTheme('theme-green')" title="Hijau"></button>
+        <button class="theme-dot theme-orange" onclick="setTheme('theme-orange')" title="Orange"></button>
+      </div>
+
+      <div class="menu-grid">
+        <div class="menu" onclick="go('laporan')">
+          <div class="menu-icon">🛠️</div>
+          <div>
+            <div class="menu-title">Buat Laporan</div>
+            <div class="menu-desc">Input breakdown, lokasi, waktu, dan tindakan.</div>
+          </div>
+        </div>
+
+        <div class="menu" onclick="go('history')">
+          <div class="menu-icon">📜</div>
+          <div>
+            <div class="menu-title">History</div>
+            <div class="menu-desc">Lihat laporan yang tersimpan di perangkat.</div>
+          </div>
+        </div>
+
+        <div class="menu" onclick="go('kpi')">
+          <div class="menu-icon">📊</div>
+          <div>
+            <div class="menu-title">KPI</div>
+            <div class="menu-desc">Ringkasan jumlah laporan lokal.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-danger" onclick="logout()">Keluar</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const user = getUser();
+    if(!user){
+      location.href = "index.html";
+    }else{
+      document.getElementById("nama").innerText = "Halo, " + (user.NAMA || user.nama || "Mekanik");
+    }
+  </script>
+</body>
+</html>

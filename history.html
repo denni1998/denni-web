@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History Laporan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page" style="max-width:980px">
+    <section class="card">
+      <div class="topbar">
+        <div>
+          <h1>History</h1>
+          <p class="subtitle">Data yang tersimpan lokal di perangkat.</p>
+        </div>
+        <button class="icon-btn" onclick="go('home')">←</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Nama</th>
+              <th>Nomor Mesin</th>
+              <th>Lokasi</th>
+              <th>Mulai</th>
+              <th>Selesai</th>
+              <th>Total Waktu</th>
+              <th>Problem</th>
+              <th>Tindakan</th>
+              <th>Catatan</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <button class="btn-secondary" onclick="go('home')">Kembali ke Home</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const data = getLaporan();
+    let html = "";
+
+    data.slice().reverse().forEach(d => {
+      html += `
+        <tr>
+          <td>${d.tanggal || ""}</td>
+          <td>${d.nama || ""}</td>
+          <td>${d.mesin || ""}</td>
+          <td>${d.lokasi || ""}</td>
+          <td>${d.mulai || ""}</td>
+          <td>${d.selesai || ""}</td>
+          <td>${d.total || ""}</td>
+          <td>${d.problem || ""}</td>
+          <td>${d.tindakan || ""}</td>
+          <td>${d.catatan || ""}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById("tbody").innerHTML = html || `<tr><td colspan="10">Belum ada laporan lokal</td></tr>`;
+  </script>
+</body>
+</html>
