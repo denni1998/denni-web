@@ -1,5 +1,5 @@
 const SPREADSHEET_ID = "1K_BsOd1Za3LvLQwcZvfKYXMg54pP0UAMLPJGojz7zjw";
-const SHEET_NAME = "Sheet1";
+const SHEET_NAME = "DATA";
 
 function doPost(e) {
   try {
