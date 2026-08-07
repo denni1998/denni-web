@@ -1,6 +1,5 @@
 // GANTI dengan URL Web App dari Google Apps Script setelah deploy
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_gsUnHIKW1DzJ7PHYtkw9X9JyiRHQTNKDMUHvPU7QYbAy-uahVbwhbEsAeXEYJ8NC1Q/exec";
-
 const SHEET_ID = "1K_BsOd1Za3LvLQwcZvfKYXMq54pP0UAMLPJGojz7zjw";
 const API_AKUN = `https://opensheet.elk.sh/${SHEET_ID}/akun`;
 
