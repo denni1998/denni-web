@@ -3,13 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>KPI Mekanik</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
   <style>
+
     :root{
       --primary:#2563eb;
       --primary-dark:#1d4ed8;
@@ -24,403 +33,3042 @@
       --line:rgba(15,23,42,.28);
       --shadow:0 18px 45px rgba(15,23,42,.12);
     }
-    *{box-sizing:border-box}
+
+    *{
+      box-sizing:border-box;
+    }
+
     body{
       margin:0;
       font-family:Inter,Arial,sans-serif;
       color:var(--text);
-      background:radial-gradient(circle at top left,rgba(37,99,235,.14),transparent 34%),var(--bg);
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(37,99,235,.14),
+          transparent 34%
+        ),
+        var(--bg);
     }
-    .page{max-width:1540px;margin:0 auto;padding:22px}
+
+    .page{
+      max-width:1540px;
+      margin:0 auto;
+      padding:22px;
+    }
+
     .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:14px;
-      background:var(--card);border-radius:24px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow)
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      background:var(--card);
+      border-radius:24px;
+      padding:18px 20px;
+      margin-bottom:18px;
+      box-shadow:var(--shadow);
     }
-    h1{margin:0;font-size:clamp(24px,3vw,40px);font-weight:900;letter-spacing:-.04em}
-    .subtitle{margin:6px 0 0;color:var(--muted);font-weight:600}
-    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .select,.btn{
-      height:44px;border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:0 14px;
-      background:#fff;font:inherit;font-weight:800;color:var(--text)
+
+    h1{
+      margin:0;
+      font-size:clamp(24px,3vw,40px);
+      font-weight:900;
+      letter-spacing:-.04em;
     }
-    .select{min-width:210px}
-    .btn{cursor:pointer;background:var(--primary);color:#fff;border:0;box-shadow:0 10px 24px rgba(37,99,235,.28)}
-    .btn:hover{background:var(--primary-dark)}
-    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
-    .stat{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--shadow);border:1px solid rgba(15,23,42,.06)}
-    .stat-icon{font-size:26px;margin-bottom:8px}.stat-number{font-size:30px;font-weight:900;letter-spacing:-.04em}.stat-label{font-size:13px;color:var(--muted);font-weight:800;margin-top:4px}
-    .dashboard{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .panel{background:var(--card);border-radius:24px;padding:16px;box-shadow:var(--shadow);overflow:hidden}
-    .panel-title{text-align:center;font-size:clamp(22px,2.5vw,36px);font-weight:900;letter-spacing:-.04em;margin:0 0 14px;text-transform:uppercase}
-    .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
-    table{width:100%;border-collapse:collapse;min-width:680px;background:#fff;font-size:16px}
-    th,td{border:1px solid var(--line);padding:8px 10px;text-align:center;white-space:nowrap}
-    th{background:var(--cyan);font-weight:900;text-transform:uppercase}
-    td:first-child,th:first-child{text-align:left}
-    .total-row td{background:var(--yellow);font-weight:900}
-    .target-row td{background:var(--green);font-weight:800}
-    .overtime-row td{background:var(--overtime);font-weight:900}
-    .chart-card{margin-top:16px;border:1px solid rgba(15,23,42,.18);border-radius:18px;padding:16px;background:#fff;min-height:360px}
-    .chart-title{text-align:center;font-weight:900;font-size:22px;margin:0 0 12px;text-transform:uppercase}
-    .chart-box{height:310px;position:relative}
-    .status{margin:14px 0;padding:14px;border-radius:16px;background:#fff8db;color:#854d0e;font-weight:800;display:none}
-    .status.show{display:block}
-    @media(max-width:1080px){.dashboard{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:560px){.page{padding:14px}.topbar{align-items:flex-start;flex-direction:column}.actions{width:100%}.select,.btn{width:100%}.summary-grid{grid-template-columns:1fr}.panel{padding:12px}.chart-card{min-height:330px}.chart-box{height:260px}}
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .select,
+    .btn{
+      height:44px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.12);
+      padding:0 14px;
+      background:#fff;
+      font:inherit;
+      font-weight:800;
+      color:var(--text);
+    }
+
+    .select{
+      min-width:190px;
+    }
+
+    .btn{
+      cursor:pointer;
+      background:var(--primary);
+      color:#fff;
+      border:0;
+      box-shadow:
+        0 10px 24px
+        rgba(37,99,235,.28);
+    }
+
+    .btn:hover{
+      background:var(--primary-dark);
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:
+        repeat(4,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .stat{
+      background:var(--card);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      border:
+        1px solid
+        rgba(15,23,42,.06);
+    }
+
+    .stat-icon{
+      font-size:26px;
+      margin-bottom:8px;
+    }
+
+    .stat-number{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+    }
+
+    .stat-label{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      margin-top:4px;
+    }
+
+    .dashboard{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+    }
+
+    .panel{
+      background:var(--card);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-title{
+      text-align:center;
+      font-size:clamp(20px,2.5vw,32px);
+      font-weight:900;
+      letter-spacing:-.04em;
+      margin:0 0 14px;
+      text-transform:uppercase;
+    }
+
+    .table-wrap{
+      overflow-x:auto;
+      border-radius:14px;
+      border:1px solid var(--line);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:680px;
+      background:#fff;
+      font-size:16px;
+    }
+
+    th,
+    td{
+      border:1px solid var(--line);
+      padding:8px 10px;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    th{
+      background:var(--cyan);
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    td:first-child,
+    th:first-child{
+      text-align:left;
+    }
+
+    .total-row td{
+      background:var(--yellow);
+      font-weight:900;
+    }
+
+    .target-row td{
+      background:var(--green);
+      font-weight:800;
+    }
+
+    .overtime-row td{
+      background:var(--overtime);
+      font-weight:900;
+    }
+
+    .chart-card{
+      margin-top:16px;
+      border:
+        1px solid
+        rgba(15,23,42,.18);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      min-height:360px;
+    }
+
+    .chart-title{
+      text-align:center;
+      font-weight:900;
+      font-size:22px;
+      margin:0 0 12px;
+      text-transform:uppercase;
+    }
+
+    .chart-box{
+      height:310px;
+      position:relative;
+    }
+
+    .status{
+      margin:14px 0;
+      padding:14px;
+      border-radius:16px;
+      background:#fff8db;
+      color:#854d0e;
+      font-weight:800;
+      display:none;
+    }
+
+    .status.show{
+      display:block;
+    }
+
+    @media(max-width:1080px){
+
+      .dashboard{
+        grid-template-columns:1fr;
+      }
+
+      .summary-grid{
+        grid-template-columns:
+          repeat(2,1fr);
+      }
+
+    }
+
+    @media(max-width:560px){
+
+      .page{
+        padding:14px;
+      }
+
+      .topbar{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .actions{
+        width:100%;
+      }
+
+      .select,
+      .btn{
+        width:100%;
+      }
+
+      .summary-grid{
+        grid-template-columns:1fr;
+      }
+
+      .panel{
+        padding:12px;
+      }
+
+      .chart-card{
+        min-height:330px;
+      }
+
+      .chart-box{
+        height:260px;
+      }
+
+    }
+
   </style>
+
 </head>
+
+
 <body>
+
   <main class="page">
+
+    <!-- HEADER -->
+
     <section class="topbar">
+
       <div>
+
         <h1>📊 KPI Mekanik</h1>
-        <p class="subtitle">Data live dari Google Spreadsheet sheet DATA.</p>
+
+        <p class="subtitle">
+          Data live dari Google Spreadsheet sheet DATA.
+        </p>
+
       </div>
+
+
+      <!-- FILTER -->
+
       <div class="actions">
-        <select class="select" id="monthFilter"></select>
-        <button class="btn" onclick="loadKPI(true)">🔄 Refresh</button>
-        <button class="btn" onclick="goHome()">← Home</button>
+
+        <!-- JENIS PERIODE -->
+
+        <select
+          class="select"
+          id="periodType"
+        >
+
+          <option value="daily">
+            📅 Harian
+          </option>
+
+          <option value="weekly">
+            📆 Mingguan
+          </option>
+
+          <option
+            value="monthly"
+            selected
+          >
+            🗓️ Bulanan
+          </option>
+
+          <option value="yearly">
+            📊 Tahunan
+          </option>
+
+          <option value="all">
+            📁 Semua Data
+          </option>
+
+        </select>
+
+
+        <!-- PILIH PERIODE -->
+
+        <select
+          class="select"
+          id="periodFilter"
+        ></select>
+
+
+        <button
+          class="btn"
+          onclick="loadKPI(true)"
+        >
+          🔄 Refresh
+        </button>
+
+
+        <button
+          class="btn"
+          onclick="goHome()"
+        >
+          ← Home
+        </button>
+
       </div>
+
     </section>
 
-    <div id="status" class="status"></div>
+
+    <!-- STATUS -->
+
+    <div
+      id="status"
+      class="status"
+    ></div>
+
+
+    <!-- SUMMARY -->
 
     <section class="summary-grid">
-      <div class="stat"><div class="stat-icon">🛠️</div><div class="stat-number" id="sumRepair">0</div><div class="stat-label">Jumlah Perbaikan</div></div>
-      <div class="stat"><div class="stat-icon">⏱️</div><div class="stat-number" id="sumRepairDown">0</div><div class="stat-label">Downtime Perbaikan</div></div>
-      <div class="stat"><div class="stat-icon">🔩</div><div class="stat-number" id="sumSparepart">0</div><div class="stat-label">Pergantian Sparepart</div></div>
-      <div class="stat"><div class="stat-icon">⏳</div><div class="stat-number" id="sumSparepartDown">0</div><div class="stat-label">Downtime Sparepart</div></div>
+
+      <div class="stat">
+
+        <div class="stat-icon">
+          🛠️
+        </div>
+
+        <div
+          class="stat-number"
+          id="sumRepair"
+        >
+          0
+        </div>
+
+        <div class="stat-label">
+          Jumlah Perbaikan
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-icon">
+          ⏱️
+        </div>
+
+        <div
+          class="stat-number"
+          id="sumRepairDown"
+        >
+          0
+        </div>
+
+        <div class="stat-label">
+          Downtime Perbaikan
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-icon">
+          🔩
+        </div>
+
+        <div
+          class="stat-number"
+          id="sumSparepart"
+        >
+          0
+        </div>
+
+        <div class="stat-label">
+          Pergantian Sparepart
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-icon">
+          ⏳
+        </div>
+
+        <div
+          class="stat-number"
+          id="sumSparepartDown"
+        >
+          0
+        </div>
+
+        <div class="stat-label">
+          Downtime Sparepart
+        </div>
+
+      </div>
+
     </section>
+
+
+    <!-- DASHBOARD -->
 
     <section class="dashboard">
-      <article class="panel">
-        <h2 class="panel-title" id="repairTitle">PERFORMA</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Jenis Perbaikan</th><th>Jumlah Perbaikan</th><th>Downtime (Minute)</th></tr></thead>
-            <tbody id="repairBody"></tbody>
-          </table>
-        </div>
-        <div class="chart-card"><h3 class="chart-title">Jumlah Perbaikan</h3><div class="chart-box"><canvas id="repairChart"></canvas></div></div>
-      </article>
+
+
+      <!-- PERBAIKAN -->
 
       <article class="panel">
-        <h2 class="panel-title" id="sparepartTitle">PERFORMA</h2>
+
+        <h2
+          class="panel-title"
+          id="repairTitle"
+        >
+          PERFORMA
+        </h2>
+
+
         <div class="table-wrap">
+
           <table>
-            <thead><tr><th>Pergantian Sparepart</th><th>Pergantian Sparepart</th><th>Downtime (Minute)</th></tr></thead>
-            <tbody id="sparepartBody"></tbody>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Jenis Perbaikan
+                </th>
+
+                <th>
+                  Jumlah Perbaikan
+                </th>
+
+                <th>
+                  Downtime (Menit)
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody
+              id="repairBody"
+            ></tbody>
+
           </table>
+
         </div>
-        <div class="chart-card"><h3 class="chart-title">Jumlah Pergantian Sparepart</h3><div class="chart-box"><canvas id="sparepartChart"></canvas></div></div>
+
+
+        <div class="chart-card">
+
+          <h3 class="chart-title">
+            Jumlah Perbaikan
+          </h3>
+
+          <div class="chart-box">
+
+            <canvas
+              id="repairChart"
+            ></canvas>
+
+          </div>
+
+        </div>
+
       </article>
+
+
+      <!-- SPAREPART -->
+
+      <article class="panel">
+
+        <h2
+          class="panel-title"
+          id="sparepartTitle"
+        >
+          PERFORMA
+        </h2>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Jenis Problem
+                </th>
+
+                <th>
+                  Jumlah Sparepart
+                </th>
+
+                <th>
+                  Downtime (Menit)
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody
+              id="sparepartBody"
+            ></tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="chart-card">
+
+          <h3 class="chart-title">
+            Jumlah Pergantian Sparepart
+          </h3>
+
+          <div class="chart-box">
+
+            <canvas
+              id="sparepartChart"
+            ></canvas>
+
+          </div>
+
+        </div>
+
+      </article>
+
     </section>
+
   </main>
 
-  <script>
-    const SPREADSHEET_ID = "1K_BsOd1Za3LvLQwcZvfKYXMq54pP0UAMLPJGojz7zjw";
-    const SHEET_NAME = "data";
-    const DATA_URL = `https://opensheet.elk.sh/${SPREADSHEET_ID}/${SHEET_NAME}`;
-    const TARGET_PERBAIKAN = 10;
-    const TARGET_SPAREPART = 20;
-    const CATEGORIES = [
-      "DM-01: Jahitan Loncat",
-      "DM-02: Jahitan Putus",
-      "DM-03: Kendor/kerut",
-      "DM-04: Setting C/set",
-      "DM-05: Overhoul",
-      "DM-06: Lain-lain",
-      "SU : Set up"
-    ];
 
-    let rawRows = [];
-    let repairChart = null;
-    let sparepartChart = null;
+<script>
 
-    Chart.register(ChartDataLabels);
 
-    function goHome(){ window.location.href = "home.html"; }
-    function showStatus(message){ const el=document.getElementById("status"); el.textContent=message; el.classList.toggle("show",!!message); }
-    function numberFormat(n){ return Number(n || 0).toLocaleString("id-ID"); }
-    function normalizeKey(value){ return String(value || "").trim().toLowerCase().replace(/\s+/g," "); }
-    function normalizeText(value){ return String(value || "").trim().toLowerCase().replace(/\s+/g," "); }
+/* ==========================================
+   KONFIGURASI SPREADSHEET
+========================================== */
 
-    function getValue(row, names){
-      const map = {};
-      Object.keys(row || {}).forEach(key => map[normalizeKey(key)] = row[key]);
-      for(const name of names){
-        const value = map[normalizeKey(name)];
-        if(value !== undefined && value !== null && String(value).trim() !== "") return value;
+const SPREADSHEET_ID =
+  "1K_BsOd1Za3LvLQwcZvfKYXMq54pP0UAMLPJGojz7zjw";
+
+const SHEET_NAME =
+  "data";
+
+const DATA_URL =
+  `https://opensheet.elk.sh/${SPREADSHEET_ID}/${SHEET_NAME}`;
+
+
+/* ==========================================
+   TARGET
+========================================== */
+
+const TARGET_PERBAIKAN = 10;
+
+const TARGET_SPAREPART = 20;
+
+
+/* ==========================================
+   KATEGORI PROBLEM
+========================================== */
+
+const CATEGORIES = [
+
+  "DM-01: Jahitan Loncat",
+
+  "DM-02: Jahitan Putus",
+
+  "DM-03: Kendor/kerut",
+
+  "DM-04: Setting C/set",
+
+  "DM-05: Overhoul",
+
+  "DM-06: Lain-lain",
+
+  "SU : Set up"
+
+];
+
+
+/* ==========================================
+   VARIABLE GLOBAL
+========================================== */
+
+let rawRows = [];
+
+let repairChart = null;
+
+let sparepartChart = null;
+
+
+/* ==========================================
+   REGISTER CHART
+========================================== */
+
+Chart.register(
+  ChartDataLabels
+);
+
+
+/* ==========================================
+   HOME
+========================================== */
+
+function goHome(){
+
+  window.location.href =
+    "home.html";
+
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+function showStatus(message){
+
+  const el =
+    document.getElementById(
+      "status"
+    );
+
+  el.textContent =
+    message;
+
+  el.classList.toggle(
+    "show",
+    !!message
+  );
+
+}
+
+
+/* ==========================================
+   FORMAT ANGKA
+========================================== */
+
+function numberFormat(n){
+
+  return Number(
+    n || 0
+  ).toLocaleString(
+    "id-ID"
+  );
+
+}
+
+
+/* ==========================================
+   NORMALISASI TEXT
+========================================== */
+
+function normalizeKey(value){
+
+  return String(
+    value || ""
+  )
+  .trim()
+  .toLowerCase()
+  .replace(
+    /\s+/g,
+    " "
+  );
+
+}
+
+
+function normalizeText(value){
+
+  return String(
+    value || ""
+  )
+  .trim()
+  .toLowerCase()
+  .replace(
+    /\s+/g,
+    " "
+  );
+
+}
+
+
+/* ==========================================
+   AMBIL VALUE DARI ROW
+========================================== */
+
+function getValue(
+  row,
+  names
+){
+
+  const map = {};
+
+  Object.keys(
+    row || {}
+  ).forEach(
+    key => {
+
+      map[
+        normalizeKey(key)
+      ] = row[key];
+
+    }
+  );
+
+
+  for(
+    const name of names
+  ){
+
+    const value =
+      map[
+        normalizeKey(name)
+      ];
+
+    if(
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
+    ){
+
+      return value;
+
+    }
+
+  }
+
+
+  return "";
+
+}
+
+
+/* ==========================================
+   PARSE MENIT
+========================================== */
+
+function parseMinutes(value){
+
+  if(
+    Array.isArray(value)
+  ){
+
+    const h =
+      Number(value[0] || 0);
+
+    const m =
+      Number(value[1] || 0);
+
+    const sec =
+      Number(value[2] || 0);
+
+    return Math.round(
+      (h * 60) +
+      m +
+      (sec / 60)
+    );
+
+  }
+
+
+  const raw =
+    String(
+      value || ""
+    ).trim();
+
+
+  if(!raw){
+
+    return 0;
+
+  }
+
+
+  /* FORMAT JAM:MENIT:DETIK */
+
+  if(
+    raw.includes(":")
+  ){
+
+    const parts =
+      raw
+      .split(":")
+      .map(
+        v => Number(v)
+      );
+
+
+    if(
+      parts.length === 3 &&
+      parts.every(
+        v => !Number.isNaN(v)
+      )
+    ){
+
+      const [
+        hours,
+        minutes,
+        seconds
+      ] = parts;
+
+
+      return Math.round(
+        (hours * 60) +
+        minutes +
+        (seconds / 60)
+      );
+
+    }
+
+
+    if(
+      parts.length === 2 &&
+      parts.every(
+        v => !Number.isNaN(v)
+      )
+    ){
+
+      const [
+        minutes,
+        seconds
+      ] = parts;
+
+
+      return Math.round(
+        minutes +
+        (seconds / 60)
+      );
+
+    }
+
+  }
+
+
+  const match =
+    raw.match(
+      /-?\d+(?:[.,]\d+)?/
+    );
+
+
+  return match
+
+    ? Math.round(
+        Number(
+          match[0]
+          .replace(
+            ",",
+            "."
+          )
+        )
+      )
+
+    : 0;
+
+}
+
+
+/* ==========================================
+   NORMALISASI KATEGORI
+========================================== */
+
+function normalizeCategory(problem){
+
+  const p =
+    normalizeText(problem);
+
+
+  if(
+    p.includes("jahitan loncat") ||
+    p.includes("dm-01")
+  ){
+
+    return
+      "DM-01: Jahitan Loncat";
+
+  }
+
+
+  if(
+    p.includes("jahitan putus") ||
+    p.includes("dm-02")
+  ){
+
+    return
+      "DM-02: Jahitan Putus";
+
+  }
+
+
+  if(
+    p.includes("kendor") ||
+    p.includes("kerut") ||
+    p.includes("dm-03")
+  ){
+
+    return
+      "DM-03: Kendor/kerut";
+
+  }
+
+
+  if(
+    p.includes("setting") ||
+    p.includes("c/set") ||
+    p.includes("dm-04")
+  ){
+
+    return
+      "DM-04: Setting C/set";
+
+  }
+
+
+  if(
+    p.includes("overhoul") ||
+    p.includes("overhaul") ||
+    p.includes("dm-05")
+  ){
+
+    return
+      "DM-05: Overhoul";
+
+  }
+
+
+  if(
+    p.includes("set up") ||
+    p.includes("setup") ||
+    p === "su"
+  ){
+
+    return
+      "SU : Set up";
+
+  }
+
+
+  return
+    "DM-06: Lain-lain";
+
+}
+
+
+/* ==========================================
+   PARSE TANGGAL
+========================================== */
+
+function parseDateFlexible(
+  value,
+  timestamp
+){
+
+  const raw =
+    String(
+      value || ""
+    ).trim();
+
+
+  /* FORMAT YYYY-MM-DD */
+
+  if(raw){
+
+    const iso =
+      raw.match(
+        /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/
+      );
+
+
+    if(iso){
+
+      return new Date(
+
+        Number(iso[1]),
+
+        Number(iso[2]) - 1,
+
+        Number(iso[3])
+
+      );
+
+    }
+
+
+    /* FORMAT DD/MM/YYYY */
+
+    const id =
+      raw.match(
+        /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/
+      );
+
+
+    if(id){
+
+      return new Date(
+
+        Number(id[3]),
+
+        Number(id[2]) - 1,
+
+        Number(id[1])
+
+      );
+
+    }
+
+  }
+
+
+  /* AMBIL DARI TIMESTAMP */
+
+  const tsRaw =
+    String(
+      timestamp || ""
+    ).trim();
+
+
+  const ts =
+    tsRaw.match(
+      /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/
+    );
+
+
+  if(ts){
+
+    return new Date(
+
+      Number(ts[3]),
+
+      Number(ts[2]) - 1,
+
+      Number(ts[1])
+
+    );
+
+  }
+
+
+  const parsed =
+    new Date(
+      raw || tsRaw
+    );
+
+
+  return isNaN(parsed)
+
+    ? null
+
+    : parsed;
+
+}
+
+
+/* ==========================================
+   AMBIL TANGGAL DARI ROW
+========================================== */
+
+function getRowDate(row){
+
+  return parseDateFlexible(
+
+    getValue(
+      row,
+      [
+        "Tanggal",
+        "tanggal"
+      ]
+    ),
+
+    getValue(
+      row,
+      [
+        "Timestamp",
+        "timestamp"
+      ]
+    )
+
+  );
+
+}
+
+
+/* ==========================================
+   KEY HARIAN
+========================================== */
+
+function getDailyKey(date){
+
+  if(!date){
+
+    return "";
+
+  }
+
+
+  const tahun =
+    date.getFullYear();
+
+
+  const bulan =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  const hari =
+    String(
+      date.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  return
+    `${tahun}-${bulan}-${hari}`;
+
+}
+
+
+/* ==========================================
+   KEY BULANAN
+========================================== */
+
+function getMonthlyKey(date){
+
+  if(!date){
+
+    return "";
+
+  }
+
+
+  const tahun =
+    date.getFullYear();
+
+
+  const bulan =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  return
+    `${tahun}-${bulan}`;
+
+}
+
+
+/* ==========================================
+   KEY TAHUNAN
+========================================== */
+
+function getYearlyKey(date){
+
+  if(!date){
+
+    return "";
+
+  }
+
+
+  return String(
+    date.getFullYear()
+  );
+
+}
+
+
+/* ==========================================
+   HITUNG NOMOR MINGGU
+========================================== */
+
+function getWeekNumber(date){
+
+  const d =
+    new Date(
+
+      Date.UTC(
+
+        date.getFullYear(),
+
+        date.getMonth(),
+
+        date.getDate()
+
+      )
+
+    );
+
+
+  const dayNum =
+    d.getUTCDay() || 7;
+
+
+  d.setUTCDate(
+
+    d.getUTCDate() +
+    4 -
+    dayNum
+
+  );
+
+
+  const yearStart =
+    new Date(
+
+      Date.UTC(
+
+        d.getUTCFullYear(),
+
+        0,
+
+        1
+
+      )
+
+    );
+
+
+  const weekNo =
+    Math.ceil(
+
+      (
+
+        (
+
+          d -
+          yearStart
+
+        ) /
+
+        86400000
+
+        +
+
+        1
+
+      )
+
+      /
+
+      7
+
+    );
+
+
+  return {
+
+    year:
+      d.getUTCFullYear(),
+
+    week:
+      weekNo
+
+  };
+
+}
+
+
+/* ==========================================
+   KEY MINGGUAN
+========================================== */
+
+function getWeeklyKey(date){
+
+  if(!date){
+
+    return "";
+
+  }
+
+
+  const week =
+    getWeekNumber(date);
+
+
+  return
+    `${week.year}-W${String(
+      week.week
+    ).padStart(
+      2,
+      "0"
+    )}`;
+
+}
+
+
+/* ==========================================
+   LABEL HARIAN
+========================================== */
+
+function dailyLabel(key){
+
+  const parts =
+    key
+    .split("-")
+    .map(
+      Number
+    );
+
+
+  const date =
+    new Date(
+
+      parts[0],
+
+      parts[1] - 1,
+
+      parts[2]
+
+    );
+
+
+  return date
+
+    .toLocaleDateString(
+
+      "id-ID",
+
+      {
+
+        weekday:"long",
+
+        day:"2-digit",
+
+        month:"long",
+
+        year:"numeric"
+
       }
-      return "";
+
+    )
+
+    .toUpperCase();
+
+}
+
+
+/* ==========================================
+   LABEL BULANAN
+========================================== */
+
+function monthlyLabel(key){
+
+  const [
+    tahun,
+    bulan
+  ] =
+    key
+    .split("-")
+    .map(
+      Number
+    );
+
+
+  return new Date(
+
+    tahun,
+
+    bulan - 1,
+
+    1
+
+  )
+
+  .toLocaleDateString(
+
+    "id-ID",
+
+    {
+
+      month:"long",
+
+      year:"numeric"
+
     }
 
-    function parseMinutes(value){
-      // Google Visualization API kadang mengirim durasi sebagai array: [jam, menit, detik, ms].
-      if(Array.isArray(value)){
-        const h = Number(value[0] || 0);
-        const m = Number(value[1] || 0);
-        const sec = Number(value[2] || 0);
-        return Math.round((h * 60) + m + (sec / 60));
-      }
+  )
 
-      const raw = String(value || "").trim();
-      if(!raw) return 0;
+  .toUpperCase();
 
-      // Format dari Google Sheet bisa seperti 0:08:00, 00:08:00, 8:00, atau 8 menit.
-      if(raw.includes(":")){
-        const parts = raw.split(":").map(v => Number(v));
-        if(parts.length === 3 && parts.every(v => !Number.isNaN(v))){
-          const [hours, minutes, seconds] = parts;
-          return Math.round((hours * 60) + minutes + (seconds / 60));
-        }
-        if(parts.length === 2 && parts.every(v => !Number.isNaN(v))){
-          const [minutes, seconds] = parts;
-          return Math.round(minutes + (seconds / 60));
-        }
-      }
+}
 
-      const match = raw.match(/-?\d+(?:[.,]\d+)?/);
-      return match ? Math.round(Number(match[0].replace(",","."))) : 0;
-    }
 
-    function normalizeCategory(problem){
-      const p = normalizeText(problem);
-      if(p.includes("jahitan loncat") || p.includes("dm-01")) return "DM-01: Jahitan Loncat";
-      if(p.includes("jahitan putus") || p.includes("dm-02")) return "DM-02: Jahitan Putus";
-      if(p.includes("kendor") || p.includes("kerut") || p.includes("dm-03")) return "DM-03: Kendor/kerut";
-      if(p.includes("setting") || p.includes("c/set") || p.includes("dm-04")) return "DM-04: Setting C/set";
-      if(p.includes("overhoul") || p.includes("overhaul") || p.includes("dm-05")) return "DM-05: Overhoul";
-      if(p.includes("set up") || p.includes("setup") || p.includes("su")) return "SU : Set up";
-      return "DM-06: Lain-lain";
-    }
+/* ==========================================
+   LABEL TAHUNAN
+========================================== */
 
-    function parseDateFlexible(value, timestamp){
-      const raw = String(value || "").trim();
-      if(raw){
-        const iso = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-        if(iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+function yearlyLabel(key){
 
-        // Format sheet kamu: 4/5/2026 = 4 Mei 2026.
-        const id = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
-        if(id) return new Date(Number(id[3]), Number(id[2])-1, Number(id[1]));
-      }
+  return
+    `TAHUN ${key}`;
 
-      const tsRaw = String(timestamp || "").trim();
-      const ts = tsRaw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
-      if(ts) return new Date(Number(ts[3]), Number(ts[2])-1, Number(ts[1]));
+}
 
-      const parsed = new Date(raw || tsRaw);
-      return isNaN(parsed) ? null : parsed;
-    }
 
-    function monthKeyFromRow(row){
-      const date = parseDateFlexible(getValue(row,["Tanggal","tanggal"]), getValue(row,["Timestamp","timestamp"]));
-      if(!date) return "";
-      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
-    }
+/* ==========================================
+   LABEL MINGGUAN
+========================================== */
 
-    function monthLabel(key){
-      if(key === "ALL") return "SEMUA DATA";
-      const [y,m] = key.split("-").map(Number);
-      return new Date(y, m-1, 1).toLocaleDateString("id-ID", {month:"short", year:"numeric"}).replace(".","").toUpperCase();
-    }
+function weeklyLabel(key){
 
-    function setupMonthOptions(rows){
-      const select = document.getElementById("monthFilter");
-      const currentValue = select.value;
-      const months = [...new Set(rows.map(monthKeyFromRow).filter(Boolean))].sort().reverse();
-      select.innerHTML = `<option value="ALL">Semua Data</option>` + months.map(key => `<option value="${key}">${monthLabel(key)}</option>`).join("");
+  const [
+    year,
+    weekText
+  ] =
+    key.split("-W");
 
-      // Default ambil bulan terbaru yang memang ada datanya, jadi tidak kosong walaupun tanggal komputer beda.
-      if(currentValue && [...months,"ALL"].includes(currentValue)){
-        select.value = currentValue;
-      }else{
-        select.value = months[0] || "ALL";
-      }
-    }
 
-    function filterByMonth(rows){
-      const value = document.getElementById("monthFilter").value || "ALL";
-      if(value === "ALL") return rows;
-      return rows.filter(row => monthKeyFromRow(row) === value);
-    }
+  return
+    `MINGGU KE-${Number(
+      weekText
+    )} TAHUN ${year}`;
 
-    function makeBucket(){
-      return CATEGORIES.reduce((acc, cat)=>{ acc[cat] = {count:0, downtime:0}; return acc; }, {});
-    }
+}
 
-    function summarize(rows, type){
-      const bucket = makeBucket();
-      rows.forEach(row => {
-        const tindakan = normalizeText(getValue(row,["Tindakan","tindakan"]));
-        const isSparepart = tindakan.includes("sparepart") || tindakan.includes("spare part");
-        const isRepair = tindakan.includes("perbaikan") || tindakan.includes("repair") || !isSparepart;
-        const match = type === "sparepart" ? isSparepart : isRepair && !isSparepart;
-        if(!match) return;
 
-        const cat = normalizeCategory(getValue(row,["Problem","problem"]));
-        bucket[cat].count += 1;
-        bucket[cat].downtime += parseMinutes(getValue(row,["Total Waktu","Total waktu","total","total waktu","Downtime","downtime"]));
-      });
-      return bucket;
-    }
+/* ==========================================
+   AMBIL KEY SESUAI PERIODE
+========================================== */
 
-    function renderTable(tbodyId, bucket, targetMinute, targetLabel, totalLabel){
-      const tbody = document.getElementById(tbodyId);
-      const totalCount = CATEGORIES.reduce((s,c)=>s+bucket[c].count,0);
-      const totalDown = CATEGORIES.reduce((s,c)=>s+bucket[c].downtime,0);
-      const targetDown = totalCount * targetMinute;
-      const overtime = totalDown - targetDown;
-      tbody.innerHTML = CATEGORIES.map(cat => `
-        <tr><td>${cat}</td><td>${numberFormat(bucket[cat].count)}</td><td>${numberFormat(bucket[cat].downtime)}</td></tr>
-      `).join("") + `
-        <tr class="total-row"><td>${totalLabel}</td><td>${numberFormat(totalCount)}</td><td>${numberFormat(totalDown)}</td></tr>
-        <tr class="target-row"><td>${targetLabel}</td><td>${targetMinute} MENIT</td><td>${numberFormat(targetDown)}</td></tr>
-        <tr class="overtime-row"><td></td><td>OVERTIME</td><td>${numberFormat(overtime)}</td></tr>
+function getPeriodKey(
+  row,
+  type
+){
+
+  const date =
+    getRowDate(row);
+
+
+  if(!date){
+
+    return "";
+
+  }
+
+
+  if(
+    type === "daily"
+  ){
+
+    return
+      getDailyKey(date);
+
+  }
+
+
+  if(
+    type === "weekly"
+  ){
+
+    return
+      getWeeklyKey(date);
+
+  }
+
+
+  if(
+    type === "monthly"
+  ){
+
+    return
+      getMonthlyKey(date);
+
+  }
+
+
+  if(
+    type === "yearly"
+  ){
+
+    return
+      getYearlyKey(date);
+
+  }
+
+
+  return
+    "ALL";
+
+}
+
+
+/* ==========================================
+   LABEL PERIODE
+========================================== */
+
+function getPeriodLabel(
+  key,
+  type
+){
+
+  if(
+    key === "ALL"
+  ){
+
+    return
+      "SEMUA DATA";
+
+  }
+
+
+  if(
+    type === "daily"
+  ){
+
+    return
+      dailyLabel(key);
+
+  }
+
+
+  if(
+    type === "weekly"
+  ){
+
+    return
+      weeklyLabel(key);
+
+  }
+
+
+  if(
+    type === "monthly"
+  ){
+
+    return
+      monthlyLabel(key);
+
+  }
+
+
+  if(
+    type === "yearly"
+  ){
+
+    return
+      yearlyLabel(key);
+
+  }
+
+
+  return key;
+
+}
+
+
+/* ==========================================
+   SETUP FILTER PERIODE
+========================================== */
+
+function setupPeriodOptions(rows){
+
+  const type =
+    document
+    .getElementById(
+      "periodType"
+    )
+    .value;
+
+
+  const select =
+    document
+    .getElementById(
+      "periodFilter"
+    );
+
+
+  const currentValue =
+    select.value;
+
+
+  /* SEMUA DATA */
+
+  if(
+    type === "all"
+  ){
+
+    select.innerHTML =
+      `
+      <option value="ALL">
+        Semua Data
+      </option>
       `;
-      return { totalCount, totalDown, targetDown, overtime };
-    }
 
-    function renderChart(canvasId, chartRef, bucket){
-      const ctx = document.getElementById(canvasId);
-      const values = CATEGORIES.map(cat => bucket[cat].count);
-      const total = values.reduce((a,b)=>a+b,0);
-      if(chartRef) chartRef.destroy();
-      return new Chart(ctx, {
-        type:"pie",
-        data:{ labels:CATEGORIES, datasets:[{ data:values, borderWidth:1 }] },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{
-            legend:{ position:"right", labels:{ boxWidth:14, font:{ size:13, weight:"600" } } },
-            tooltip:{ callbacks:{ label:(ctx)=>`${ctx.label}: ${ctx.parsed} laporan` } },
-            datalabels:{
-              color:"#111827",
-              font:{weight:"900",size:13},
-              formatter:(value)=> total ? value : "",
-              anchor:"end",
-              align:"end",
-              offset:4,
-              clamp:true
-            }
-          }
-        }
-      });
-    }
 
-    function renderDashboard(){
-      const rows = filterByMonth(rawRows);
-      const month = monthLabel(document.getElementById("monthFilter").value || "ALL");
-      document.getElementById("repairTitle").textContent = `PERFORMA ${month} (PERBAIKAN)`;
-      document.getElementById("sparepartTitle").textContent = `PERFORMA ${month} (PERGANTIAN SPAREPART)`;
+    select.value =
+      "ALL";
 
-      const repair = summarize(rows, "repair");
-      const sparepart = summarize(rows, "sparepart");
-      const repairTotal = renderTable("repairBody", repair, TARGET_PERBAIKAN, "TARGET PERBAIKAN 10 MENIT", "TOTAL PERBAIKAN");
-      const sparepartTotal = renderTable("sparepartBody", sparepart, TARGET_SPAREPART, "TARGET PERGANTIAN SPAREPART", "TOTAL PERGANTIAN SPAREPART");
 
-      document.getElementById("sumRepair").textContent = numberFormat(repairTotal.totalCount);
-      document.getElementById("sumRepairDown").textContent = numberFormat(repairTotal.totalDown);
-      document.getElementById("sumSparepart").textContent = numberFormat(sparepartTotal.totalCount);
-      document.getElementById("sumSparepartDown").textContent = numberFormat(sparepartTotal.totalDown);
+    select.disabled =
+      true;
 
-      repairChart = renderChart("repairChart", repairChart, repair);
-      sparepartChart = renderChart("sparepartChart", sparepartChart, sparepart);
 
-      if(rows.length === 0){
-        showStatus("Tidak ada data pada periode yang dipilih.");
-      }else{
-        showStatus("");
+    return;
+
+  }
+
+
+  select.disabled =
+    false;
+
+
+  /* AMBIL SEMUA PERIODE */
+
+  const periods =
+    [
+
+      ...new Set(
+
+        rows
+
+        .map(
+
+          row =>
+
+            getPeriodKey(
+              row,
+              type
+            )
+
+        )
+
+        .filter(Boolean)
+
+      )
+
+    ]
+
+    .sort()
+
+    .reverse();
+
+
+  select.innerHTML =
+    periods
+
+    .map(
+      key => {
+
+        return `
+
+          <option
+            value="${key}"
+          >
+
+            ${getPeriodLabel(
+              key,
+              type
+            )}
+
+          </option>
+
+        `;
+
       }
+    )
+
+    .join("");
+
+
+  /* DEFAULT PERIODE TERBARU */
+
+  if(
+
+    currentValue &&
+
+    periods.includes(
+      currentValue
+    )
+
+  ){
+
+    select.value =
+      currentValue;
+
+  }else{
+
+    select.value =
+      periods[0] || "";
+
+  }
+
+}
+
+
+/* ==========================================
+   FILTER DATA BERDASARKAN PERIODE
+========================================== */
+
+function filterByPeriod(rows){
+
+  const type =
+    document
+    .getElementById(
+      "periodType"
+    )
+    .value;
+
+
+  const selected =
+    document
+    .getElementById(
+      "periodFilter"
+    )
+    .value;
+
+
+  if(
+
+    type === "all" ||
+
+    selected === "ALL"
+
+  ){
+
+    return rows;
+
+  }
+
+
+  return rows.filter(
+
+    row =>
+
+      getPeriodKey(
+        row,
+        type
+      )
+
+      ===
+
+      selected
+
+  );
+
+}
+
+
+/* ==========================================
+   BUAT BUCKET
+========================================== */
+
+function makeBucket(){
+
+  return CATEGORIES.reduce(
+
+    (
+      acc,
+      cat
+    ) => {
+
+      acc[cat] = {
+
+        count:0,
+
+        downtime:0
+
+      };
+
+
+      return acc;
+
+    },
+
+    {}
+
+  );
+
+}
+
+
+/* ==========================================
+   REKAP DATA
+========================================== */
+
+function summarize(
+  rows,
+  type
+){
+
+  const bucket =
+    makeBucket();
+
+
+  rows.forEach(
+    row => {
+
+
+      const tindakan =
+        normalizeText(
+
+          getValue(
+
+            row,
+
+            [
+              "Tindakan",
+              "tindakan"
+            ]
+
+          )
+
+        );
+
+
+      const isSparepart =
+
+        tindakan.includes(
+          "sparepart"
+        )
+
+        ||
+
+        tindakan.includes(
+          "spare part"
+        );
+
+
+      const isRepair =
+
+        tindakan.includes(
+          "perbaikan"
+        )
+
+        ||
+
+        tindakan.includes(
+          "repair"
+        )
+
+        ||
+
+        !isSparepart;
+
+
+      const match =
+
+        type === "sparepart"
+
+          ?
+
+          isSparepart
+
+          :
+
+          isRepair &&
+          !isSparepart;
+
+
+      if(!match){
+
+        return;
+
+      }
+
+
+      const cat =
+        normalizeCategory(
+
+          getValue(
+
+            row,
+
+            [
+              "Problem",
+              "problem"
+            ]
+
+          )
+
+        );
+
+
+      bucket[cat].count += 1;
+
+
+      bucket[cat].downtime +=
+
+        parseMinutes(
+
+          getValue(
+
+            row,
+
+            [
+
+              "Total Waktu",
+
+              "Total waktu",
+
+              "total",
+
+              "total waktu",
+
+              "Downtime",
+
+              "downtime"
+
+            ]
+
+          )
+
+        );
+
+    }
+  );
+
+
+  return bucket;
+
+}
+
+
+/* ==========================================
+   TAMPILKAN TABEL
+========================================== */
+
+function renderTable(
+
+  tbodyId,
+
+  bucket,
+
+  targetMinute,
+
+  targetLabel,
+
+  totalLabel
+
+){
+
+  const tbody =
+    document.getElementById(
+      tbodyId
+    );
+
+
+  const totalCount =
+    CATEGORIES.reduce(
+
+      (
+        s,
+        c
+      ) =>
+
+        s +
+        bucket[c].count,
+
+      0
+
+    );
+
+
+  const totalDown =
+    CATEGORIES.reduce(
+
+      (
+        s,
+        c
+      ) =>
+
+        s +
+        bucket[c].downtime,
+
+      0
+
+    );
+
+
+  const targetDown =
+    totalCount *
+    targetMinute;
+
+
+  const overtime =
+    totalDown -
+    targetDown;
+
+
+  tbody.innerHTML =
+
+
+    CATEGORIES
+
+    .map(
+      cat => `
+
+        <tr>
+
+          <td>
+            ${cat}
+          </td>
+
+          <td>
+            ${numberFormat(
+              bucket[cat].count
+            )}
+          </td>
+
+          <td>
+            ${numberFormat(
+              bucket[cat].downtime
+            )}
+          </td>
+
+        </tr>
+
+      `
+    )
+
+    .join("")
+
+
+    +
+
+
+    `
+
+      <tr class="total-row">
+
+        <td>
+          ${totalLabel}
+        </td>
+
+        <td>
+          ${numberFormat(
+            totalCount
+          )}
+        </td>
+
+        <td>
+          ${numberFormat(
+            totalDown
+          )}
+        </td>
+
+      </tr>
+
+
+      <tr class="target-row">
+
+        <td>
+          ${targetLabel}
+        </td>
+
+        <td>
+          ${targetMinute}
+          MENIT
+        </td>
+
+        <td>
+          ${numberFormat(
+            targetDown
+          )}
+        </td>
+
+      </tr>
+
+
+      <tr class="overtime-row">
+
+        <td></td>
+
+        <td>
+          OVERTIME
+        </td>
+
+        <td>
+          ${numberFormat(
+            overtime
+          )}
+        </td>
+
+      </tr>
+
+    `;
+
+
+  return {
+
+    totalCount,
+
+    totalDown,
+
+    targetDown,
+
+    overtime
+
+  };
+
+}
+
+
+/* ==========================================
+   BUAT GRAFIK
+========================================== */
+
+function renderChart(
+
+  canvasId,
+
+  chartRef,
+
+  bucket
+
+){
+
+  const ctx =
+    document.getElementById(
+      canvasId
+    );
+
+
+  const values =
+    CATEGORIES.map(
+
+      cat =>
+        bucket[cat].count
+
+    );
+
+
+  const total =
+    values.reduce(
+      (a,b) =>
+        a + b,
+      0
+    );
+
+
+  if(chartRef){
+
+    chartRef.destroy();
+
+  }
+
+
+  return new Chart(
+
+    ctx,
+
+    {
+
+      type:"pie",
+
+      data:{
+
+        labels:
+          CATEGORIES,
+
+        datasets:[
+
+          {
+
+            data:
+              values,
+
+            borderWidth:
+              1
+
+          }
+
+        ]
+
+      },
+
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+
+        plugins:{
+
+          legend:{
+
+            position:"right",
+
+            labels:{
+
+              boxWidth:14,
+
+              font:{
+
+                size:13,
+
+                weight:"600"
+
+              }
+
+            }
+
+          },
+
+
+          tooltip:{
+
+            callbacks:{
+
+              label:
+                ctx =>
+
+                  `${ctx.label}: ${ctx.parsed} laporan`
+
+            }
+
+          },
+
+
+          datalabels:{
+
+            color:"#111827",
+
+            font:{
+
+              weight:"900",
+
+              size:13
+
+            },
+
+
+            formatter:
+
+              value =>
+
+                total
+
+                  ?
+
+                  value
+
+                  :
+
+                  "",
+
+
+            anchor:"end",
+
+            align:"end",
+
+            offset:4,
+
+            clamp:true
+
+          }
+
+        }
+
+      }
+
     }
 
-    async function loadKPI(forceRefresh = false){
-      showStatus("Mengambil data dari Google Spreadsheet...");
+  );
 
-      try{
-        // Jalur utama: OpenSheet.
-        // Pada beberapa browser, file HTML yang dibuka via file:// bisa kena CORS.
-        // Kalau gagal, otomatis pindah ke Google Visualization JSONP di bawah.
-        const res = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
-        if(!res.ok) throw new Error("OpenSheet HTTP " + res.status);
-        const data = await res.json();
-        rawRows = Array.isArray(data) ? data : [];
-        if(rawRows.length === 0) throw new Error("OpenSheet kosong / bukan array");
-      }catch(openSheetErr){
-        console.warn("OpenSheet gagal, pakai fallback GViz:", openSheetErr);
+}
+
+
+/* ==========================================
+   RENDER DASHBOARD
+========================================== */
+
+function renderDashboard(){
+
+
+  const rows =
+    filterByPeriod(
+      rawRows
+    );
+
+
+  const type =
+    document
+    .getElementById(
+      "periodType"
+    )
+    .value;
+
+
+  const selected =
+    document
+    .getElementById(
+      "periodFilter"
+    )
+    .value || "ALL";
+
+
+  const periode =
+    getPeriodLabel(
+
+      selected,
+
+      type
+
+    );
+
+
+  /* JUDUL */
+
+  document
+  .getElementById(
+    "repairTitle"
+  )
+  .textContent =
+
+    `PERFORMA ${periode} (PERBAIKAN)`;
+
+
+  document
+  .getElementById(
+    "sparepartTitle"
+  )
+  .textContent =
+
+    `PERFORMA ${periode} (PERGANTIAN SPAREPART)`;
+
+
+  /* REKAP */
+
+  const repair =
+    summarize(
+      rows,
+      "repair"
+    );
+
+
+  const sparepart =
+    summarize(
+      rows,
+      "sparepart"
+    );
+
+
+  /* TABEL */
+
+  const repairTotal =
+    renderTable(
+
+      "repairBody",
+
+      repair,
+
+      TARGET_PERBAIKAN,
+
+      "TARGET PERBAIKAN 10 MENIT",
+
+      "TOTAL PERBAIKAN"
+
+    );
+
+
+  const sparepartTotal =
+    renderTable(
+
+      "sparepartBody",
+
+      sparepart,
+
+      TARGET_SPAREPART,
+
+      "TARGET PERGANTIAN SPAREPART",
+
+      "TOTAL PERGANTIAN SPAREPART"
+
+    );
+
+
+  /* SUMMARY */
+
+  document
+  .getElementById(
+    "sumRepair"
+  )
+  .textContent =
+
+    numberFormat(
+      repairTotal.totalCount
+    );
+
+
+  document
+  .getElementById(
+    "sumRepairDown"
+  )
+  .textContent =
+
+    numberFormat(
+      repairTotal.totalDown
+    );
+
+
+  document
+  .getElementById(
+    "sumSparepart"
+  )
+  .textContent =
+
+    numberFormat(
+      sparepartTotal.totalCount
+    );
+
+
+  document
+  .getElementById(
+    "sumSparepartDown"
+  )
+  .textContent =
+
+    numberFormat(
+      sparepartTotal.totalDown
+    );
+
+
+  /* CHART */
+
+  repairChart =
+    renderChart(
+
+      "repairChart",
+
+      repairChart,
+
+      repair
+
+    );
+
+
+  sparepartChart =
+    renderChart(
+
+      "sparepartChart",
+
+      sparepartChart,
+
+      sparepart
+
+    );
+
+
+  /* STATUS */
+
+  if(
+    rows.length === 0
+  ){
+
+    showStatus(
+      "Tidak ada data pada periode yang dipilih."
+    );
+
+  }else{
+
+    showStatus("");
+
+  }
+
+}
+
+
+/* ==========================================
+   LOAD DATA KPI
+========================================== */
+
+async function loadKPI(){
+
+  showStatus(
+    "Mengambil data dari Google Spreadsheet..."
+  );
+
+
+  try{
+
+
+    /* OPENSHEET */
+
+    const res =
+      await fetch(
+
+        DATA_URL +
+        "?t=" +
+        Date.now(),
+
+        {
+          cache:"no-store"
+        }
+
+      );
+
+
+    if(!res.ok){
+
+      throw new Error(
+        "OpenSheet HTTP " +
+        res.status
+      );
+
+    }
+
+
+    const data =
+      await res.json();
+
+
+    rawRows =
+      Array.isArray(data)
+
+        ?
+
+        data
+
+        :
+
+        [];
+
+
+    if(
+      rawRows.length === 0
+    ){
+
+      throw new Error(
+        "OpenSheet kosong"
+      );
+
+    }
+
+
+  }catch(openSheetErr){
+
+
+    console.warn(
+      "OpenSheet gagal, mencoba Google Visualization:",
+      openSheetErr
+    );
+
+
+    try{
+
+
+      rawRows =
+        await loadFromGoogleVisualization();
+
+
+    }catch(gvizErr){
+
+
+      console.error(
+        gvizErr
+      );
+
+
+      showStatus(
+
+        "Data belum bisa dimuat. " +
+
+        "Cek koneksi internet, " +
+
+        "pastikan Spreadsheet publish/public, " +
+
+        "dan sheet bernama DATA."
+
+      );
+
+
+      return;
+
+    }
+
+  }
+
+
+  /* SETUP FILTER */
+
+  setupPeriodOptions(
+    rawRows
+  );
+
+
+  /* TAMPILKAN DASHBOARD */
+
+  renderDashboard();
+
+}
+
+
+/* ==========================================
+   FALLBACK GOOGLE VISUALIZATION
+========================================== */
+
+function loadFromGoogleVisualization(){
+
+  return new Promise(
+
+    (
+      resolve,
+      reject
+    ) => {
+
+
+      const callbackName =
+        "__kpiGvizCallback_" +
+        Date.now();
+
+
+      const script =
+        document.createElement(
+          "script"
+        );
+
+
+      const timeout =
+        setTimeout(
+
+          () => {
+
+            cleanup();
+
+            reject(
+              new Error(
+                "Google Visualization timeout"
+              )
+            );
+
+          },
+
+          15000
+
+        );
+
+
+      function cleanup(){
+
+        clearTimeout(
+          timeout
+        );
+
+
+        delete
+          window[
+            callbackName
+          ];
+
+
+        if(
+          script.parentNode
+        ){
+
+          script.parentNode.removeChild(
+            script
+          );
+
+        }
+
+      }
+
+
+      window[
+        callbackName
+      ] = function(response){
+
+
         try{
-          rawRows = await loadFromGoogleVisualization();
-        }catch(gvizErr){
-          console.error(gvizErr);
-          showStatus("Data belum bisa dimuat. Cek koneksi internet, pastikan Spreadsheet publish/public, dan sheet bernama DATA.");
-          return;
-        }
-      }
 
-      setupMonthOptions(rawRows);
-      renderDashboard();
-    }
 
-    function loadFromGoogleVisualization(){
-      return new Promise((resolve, reject) => {
-        const callbackName = "__kpiGvizCallback_" + Date.now();
-        const script = document.createElement("script");
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error("Google Visualization timeout"));
-        }, 15000);
+          if(
 
-        function cleanup(){
-          clearTimeout(timeout);
-          delete window[callbackName];
-          if(script.parentNode) script.parentNode.removeChild(script);
-        }
+            !response ||
 
-        window[callbackName] = function(response){
-          try{
-            if(!response || response.status === "error") {
-              const msg = response && response.errors && response.errors[0] ? response.errors[0].detailed_message : "GViz error";
-              throw new Error(msg);
-            }
+            response.status === "error"
 
-            const table = response.table || {};
-            const cols = table.cols || [];
-            const rows = table.rows || [];
-            const headers = cols.map((col, index) => String(col.label || col.id || `COL_${index + 1}`).trim());
+          ){
 
-            const data = rows.map(row => {
-              const obj = {};
-              (row.c || []).forEach((cell, index) => {
-                const header = headers[index];
-                if(!header) return;
-                obj[header] = cell ? (cell.f !== undefined ? cell.f : cell.v) : "";
-              });
-              return obj;
-            }).filter(row => Object.values(row).some(v => String(v || "").trim() !== ""));
 
-            cleanup();
-            resolve(data);
-          }catch(err){
-            cleanup();
-            reject(err);
+            const msg =
+
+              response &&
+
+              response.errors &&
+
+              response.errors[0]
+
+                ?
+
+                response
+                .errors[0]
+                .detailed_message
+
+                :
+
+                "GViz error";
+
+
+            throw new Error(
+              msg
+            );
+
           }
-        };
 
-        script.onerror = () => {
+
+          const table =
+            response.table || {};
+
+
+          const cols =
+            table.cols || [];
+
+
+          const rows =
+            table.rows || [];
+
+
+          const headers =
+
+            cols.map(
+
+              (
+                col,
+                index
+              ) =>
+
+                String(
+
+                  col.label ||
+
+                  col.id ||
+
+                  `COL_${index + 1}`
+
+                ).trim()
+
+            );
+
+
+          const data =
+
+            rows
+
+            .map(
+              row => {
+
+
+                const obj =
+                  {};
+
+
+                (
+                  row.c ||
+                  []
+                )
+
+                .forEach(
+
+                  (
+                    cell,
+                    index
+                  ) => {
+
+
+                    const header =
+                      headers[index];
+
+
+                    if(!header){
+
+                      return;
+
+                    }
+
+
+                    obj[
+                      header
+                    ] =
+
+                      cell
+
+                        ?
+
+                        (
+
+                          cell.f !== undefined
+
+                            ?
+
+                            cell.f
+
+                            :
+
+                            cell.v
+
+                        )
+
+                        :
+
+                        "";
+
+                  }
+
+                );
+
+
+                return obj;
+
+              }
+            )
+
+            .filter(
+
+              row =>
+
+                Object
+
+                .values(row)
+
+                .some(
+
+                  v =>
+
+                    String(
+                      v || ""
+                    ).trim() !== ""
+
+                )
+
+            );
+
+
           cleanup();
-          reject(new Error("Script GViz gagal dimuat"));
-        };
 
-        const tqx = `out:json;responseHandler:${callbackName}`;
-        script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=${encodeURIComponent(tqx)}&tq=${encodeURIComponent("select *")}&cacheBust=${Date.now()}`;
-        document.body.appendChild(script);
-      });
+          resolve(
+            data
+          );
+
+
+        }catch(err){
+
+
+          cleanup();
+
+          reject(
+            err
+          );
+
+        }
+
+      };
+
+
+      script.onerror = () => {
+
+
+        cleanup();
+
+
+        reject(
+
+          new Error(
+            "Script Google Visualization gagal dimuat"
+          )
+
+        );
+
+      };
+
+
+      const tqx =
+        `out:json;responseHandler:${callbackName}`;
+
+
+      script.src =
+
+        `https://docs.google.com/spreadsheets/d/` +
+
+        `${SPREADSHEET_ID}` +
+
+        `/gviz/tq?sheet=` +
+
+        `${encodeURIComponent(SHEET_NAME)}` +
+
+        `&tqx=` +
+
+        `${encodeURIComponent(tqx)}` +
+
+        `&tq=` +
+
+        `${encodeURIComponent("select *")}` +
+
+        `&cacheBust=` +
+
+        `${Date.now()}`;
+
+
+      document.body.appendChild(
+        script
+      );
+
     }
 
-    document.getElementById("monthFilter").addEventListener("change", renderDashboard);
-    loadKPI();
-  </script>
+  );
+
+}
+
+
+/* ==========================================
+   EVENT GANTI JENIS PERIODE
+========================================== */
+
+document
+.getElementById(
+  "periodType"
+)
+.addEventListener(
+
+  "change",
+
+  function(){
+
+
+    setupPeriodOptions(
+      rawRows
+    );
+
+
+    renderDashboard();
+
+  }
+
+);
+
+
+/* ==========================================
+   EVENT PILIH PERIODE
+========================================== */
+
+document
+.getElementById(
+  "periodFilter"
+)
+.addEventListener(
+
+  "change",
+
+  renderDashboard
+
+);
+
+
+/* ==========================================
+   LOAD PERTAMA
+========================================== */
+
+loadKPI();
+
+
+</script>
+
 </body>
 </html>
