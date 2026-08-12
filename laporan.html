@@ -1,180 +1,620 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Buat Laporan</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
+
   <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="scanner.js"></script>
 </head>
+
 <body>
-  <main class="page">
-    <section class="card">
-      <div class="topbar">
-        <div>
-          <h1>Buat Laporan</h1>
-          <p class="subtitle">Isi data perbaikan lalu kirim ke spreadsheet.</p>
-        </div>
-        <button class="icon-btn" onclick="go('home')">←</button>
+
+<main class="page">
+
+  <section class="card">
+
+    <div class="topbar">
+      <div>
+        <h1>Buat Laporan</h1>
+        <p class="subtitle">
+          Isi data perbaikan lalu kirim ke spreadsheet.
+        </p>
       </div>
 
-      <div class="info">
-        <div id="tanggal"></div>
-        <div id="mekanik"></div>
+      <button class="icon-btn" onclick="go('home')">←</button>
+    </div>
+
+    <!-- INFORMASI -->
+    <div class="info">
+      <div id="tanggal"></div>
+      <div id="mekanik"></div>
+    </div>
+
+    <!-- NOMOR MESIN -->
+    <label>Nomor Mesin</label>
+
+    <div class="field">
+      <span class="field-icon">🏷️</span>
+      <input
+        id="mesin"
+        placeholder="Input / scan nomor mesin"
+      >
+    </div>
+
+    <button
+      type="button"
+      class="btn-secondary"
+      onclick="startScanner()"
+    >
+      📷 Scan Barcode
+    </button>
+
+    <div id="reader" class="scanBox"></div>
+
+
+    <!-- LOKASI -->
+    <label>Lokasi</label>
+    <select id="lokasi"></select>
+
+
+    <!-- WAKTU MULAI -->
+    <label>Waktu Mulai</label>
+
+    <div class="field">
+      <span class="field-icon">▶️</span>
+
+      <input
+        type="time"
+        id="mulai"
+        readonly
+      >
+
+      <button
+        type="button"
+        id="mulaiBtn"
+        onclick="mulaiPerbaikan()"
+      >
+        Mulai
+      </button>
+    </div>
+
+
+    <!-- TIMER -->
+    <div
+      id="timerBox"
+      style="
+        display:none;
+        text-align:center;
+        margin:15px 0;
+        padding:18px;
+        border-radius:12px;
+        background:#f3f4f6;
+      "
+    >
+
+      <div style="font-size:13px; margin-bottom:5px;">
+        ⏱️ Waktu Berjalan
       </div>
 
-      <label>Nomor Mesin</label>
-      <div class="field">
-        <span class="field-icon">🏷️</span>
-        <input id="mesin" placeholder="Input / scan nomor mesin">
+      <div
+        id="timer"
+        style="
+          font-size:30px;
+          font-weight:800;
+          letter-spacing:2px;
+        "
+      >
+        00:00:00
       </div>
 
-      <button type="button" class="btn-secondary" onclick="startScanner()">📷 Scan Barcode</button>
-      <div id="reader" class="scanBox"></div>
+    </div>
 
-      <label>Lokasi</label>
-      <select id="lokasi"></select>
 
-      <label>Waktu Mulai</label>
-      <input type="time" id="mulai">
+    <!-- WAKTU SELESAI -->
+    <label>Waktu Selesai</label>
 
-      <label>Waktu Selesai</label>
-      <input type="time" id="selesai">
+    <div class="field">
+      <span class="field-icon">⏹️</span>
 
-      <label>Total Waktu</label>
-      <div class="field">
-        <span class="field-icon">⏱️</span>
-        <input id="total" readonly placeholder="Otomatis terhitung">
-      </div>
+      <input
+        type="time"
+        id="selesai"
+        readonly
+      >
 
-      <label>Problem</label>
-      <select id="problem"></select>
+      <button
+        type="button"
+        id="selesaiBtn"
+        onclick="selesaiPerbaikan()"
+        disabled
+      >
+        Selesai
+      </button>
+    </div>
 
-      <label>Tindakan</label>
-      <div class="field">
-        <span class="field-icon">✅</span>
-        <input id="tindakan" readonly placeholder="Otomatis terisi">
-      </div>
 
-      <label>Catatan</label>
-      <textarea id="catatan" placeholder="Tambahkan keterangan bila perlu"></textarea>
+    <!-- TOTAL WAKTU -->
+    <label>Total Waktu</label>
 
-      <button id="kirimBtn" type="button" onclick="kirim()">Kirim Laporan</button>
-    </section>
-  </main>
+    <div class="field">
+      <span class="field-icon">⏱️</span>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-  <script>
-    const user = getUser();
-    if(!user) location.href = "index.html";
+      <input
+        id="total"
+        readonly
+        placeholder="Otomatis terhitung"
+      >
+    </div>
 
-    document.getElementById("mekanik").innerText = "👨‍🔧 Mekanik: " + (user.NAMA || user.nama || "");
 
-    const now = new Date();
-    const tglLengkap = now.toLocaleDateString("id-ID", {
-      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    <!-- PROBLEM -->
+    <label>Problem</label>
+
+    <select id="problem"></select>
+
+
+    <!-- TINDAKAN -->
+    <label>Tindakan</label>
+
+    <div class="field">
+      <span class="field-icon">✅</span>
+
+      <input
+        id="tindakan"
+        readonly
+        placeholder="Otomatis terisi"
+      >
+    </div>
+
+
+    <!-- CATATAN -->
+    <label>Catatan</label>
+
+    <textarea
+      id="catatan"
+      placeholder="Tambahkan keterangan bila perlu"
+    ></textarea>
+
+
+    <!-- KIRIM -->
+    <button
+      id="kirimBtn"
+      type="button"
+      onclick="kirim()"
+      disabled
+    >
+      Kirim Laporan
+    </button>
+
+  </section>
+
+</main>
+
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<script>
+
+  /* ==========================================
+     DATA USER
+  ========================================== */
+
+  const user = getUser();
+
+  if(!user){
+    location.href = "index.html";
+  }
+
+  document.getElementById("mekanik").innerText =
+    "👨‍🔧 Mekanik: " + (user.NAMA || user.nama || "");
+
+
+  /* ==========================================
+     TANGGAL
+  ========================================== */
+
+  const now = new Date();
+
+  const tglLengkap = now.toLocaleDateString(
+    "id-ID",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }
+  );
+
+  document.getElementById("tanggal").innerText =
+    "📅 Tanggal: " + tglLengkap;
+
+
+  /* ==========================================
+     VARIABLE TIMER
+  ========================================== */
+
+  let waktuMulai = null;
+  let waktuSelesai = null;
+
+  let timerInterval = null;
+
+  let sedangBerjalan = false;
+
+
+  /* ==========================================
+     FORMAT WAKTU
+  ========================================== */
+
+  function formatJam(date){
+
+    return date.toLocaleTimeString(
+      "id-ID",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }
+    );
+
+  }
+
+
+  /* ==========================================
+     FORMAT DURASI
+  ========================================== */
+
+  function formatDurasi(ms){
+
+    let totalDetik = Math.floor(ms / 1000);
+
+    let jam = Math.floor(totalDetik / 3600);
+
+    let menit = Math.floor(
+      (totalDetik % 3600) / 60
+    );
+
+    let detik = totalDetik % 60;
+
+    jam = String(jam).padStart(2, "0");
+
+    menit = String(menit).padStart(2, "0");
+
+    detik = String(detik).padStart(2, "0");
+
+    return jam + ":" + menit + ":" + detik;
+
+  }
+
+
+  /* ==========================================
+     MULAI PERBAIKAN
+  ========================================== */
+
+  function mulaiPerbaikan(){
+
+    if(sedangBerjalan){
+      return;
+    }
+
+    waktuMulai = new Date();
+
+    sedangBerjalan = true;
+
+    // Isi waktu mulai
+    document.getElementById("mulai").value =
+      waktuMulai.toTimeString().slice(0,5);
+
+    // Tampilkan timer
+    document.getElementById("timerBox").style.display = "block";
+
+    // Aktifkan tombol selesai
+    document.getElementById("selesaiBtn").disabled = false;
+
+    // Matikan tombol mulai
+    document.getElementById("mulaiBtn").disabled = true;
+
+    // Mulai timer
+    timerInterval = setInterval(
+      updateTimer,
+      1000
+    );
+
+    updateTimer();
+
+  }
+
+
+  /* ==========================================
+     UPDATE TIMER
+  ========================================== */
+
+  function updateTimer(){
+
+    if(!waktuMulai){
+      return;
+    }
+
+    const sekarang = new Date();
+
+    const selisih =
+      sekarang - waktuMulai;
+
+    document.getElementById("timer").innerText =
+      formatDurasi(selisih);
+
+  }
+
+
+  /* ==========================================
+     SELESAI PERBAIKAN
+  ========================================== */
+
+  function selesaiPerbaikan(){
+
+    if(!waktuMulai){
+
+      alert(
+        "Silakan tekan tombol Mulai terlebih dahulu."
+      );
+
+      return;
+    }
+
+    waktuSelesai = new Date();
+
+    sedangBerjalan = false;
+
+    // Hentikan timer
+    clearInterval(timerInterval);
+
+    // Isi waktu selesai
+    document.getElementById("selesai").value =
+      waktuSelesai.toTimeString().slice(0,5);
+
+    // Hitung total waktu
+    const durasi =
+      waktuSelesai - waktuMulai;
+
+    document.getElementById("total").value =
+      formatDurasi(durasi);
+
+    // Tentukan tindakan
+    const totalMenit =
+      Math.floor(durasi / 60000);
+
+    if(totalMenit > 15){
+
+      document.getElementById("tindakan").value =
+        "Pergantian Sparepart";
+
+    }else{
+
+      document.getElementById("tindakan").value =
+        "Perbaikan";
+
+    }
+
+    // Tombol selesai dimatikan
+    document.getElementById("selesaiBtn").disabled = true;
+
+    // Timer tetap menampilkan waktu terakhir
+    updateTimer();
+
+    // Aktifkan tombol kirim
+    document.getElementById("kirimBtn").disabled = false;
+
+  }
+
+
+  /* ==========================================
+     KIRIM LAPORAN
+  ========================================== */
+
+  async function kirim(){
+
+    const btn =
+      document.getElementById("kirimBtn");
+
+    const data = {
+
+      timestamp:
+        new Date().toISOString(),
+
+      tanggal:
+        now.toLocaleDateString("id-ID"),
+
+      nama:
+        user.NAMA ||
+        user.nama ||
+        "",
+
+      mesin:
+        document.getElementById("mesin").value.trim(),
+
+      lokasi:
+        document.getElementById("lokasi").value,
+
+      mulai:
+        document.getElementById("mulai").value,
+
+      selesai:
+        document.getElementById("selesai").value,
+
+      total:
+        document.getElementById("total").value,
+
+      problem:
+        document.getElementById("problem").value,
+
+      tindakan:
+        document.getElementById("tindakan").value,
+
+      catatan:
+        document.getElementById("catatan").value.trim()
+
+    };
+
+
+    /* VALIDASI */
+
+    if(
+      !data.mesin ||
+      !data.lokasi ||
+      !data.mulai ||
+      !data.selesai ||
+      !data.problem ||
+      !data.total
+    ){
+
+      alert("Data belum lengkap");
+
+      return;
+    }
+
+
+    btn.disabled = true;
+
+    btn.innerText = "Menyimpan...";
+
+
+    try{
+
+      await saveLaporan(data);
+
+      alert(
+        "Laporan tersimpan ke HP dan Google Spreadsheet"
+      );
+
+      location.href = "home.html";
+
+    }catch(e){
+
+      console.error(e);
+
+      alert(
+        "Tersimpan di HP, tapi gagal masuk spreadsheet: " +
+        e.message
+      );
+
+      location.href = "home.html";
+
+    }
+
+  }
+
+
+  /* ==========================================
+     LOAD LOKASI
+  ========================================== */
+
+  async function loadLokasi(){
+
+    const url =
+      "https://opensheet.elk.sh/1K_BsOd1Za3LvLQwcZvfKYXMq54pP0UAMLPJGojz7zjw/lokasi";
+
+    const res =
+      await fetch(url);
+
+    const data =
+      await res.json();
+
+    const lokasiEl =
+      document.getElementById("lokasi");
+
+    lokasiEl.innerHTML =
+      '<option value="">Pilih Lokasi</option>';
+
+    data.forEach(row => {
+
+      const opt =
+        document.createElement("option");
+
+      opt.value =
+        row.LOKASI;
+
+      opt.text =
+        row.LOKASI;
+
+      lokasiEl.appendChild(opt);
+
     });
 
-    document.getElementById("tanggal").innerText = "📅 Tanggal: " + tglLengkap;
+    new TomSelect("#lokasi");
 
-    function hitungTotal(){
-      if(!mulai.value || !selesai.value) return;
+  }
 
-      const m = new Date("1970-01-01T" + mulai.value + ":00");
-      const s = new Date("1970-01-01T" + selesai.value + ":00");
-      const diff = (s - m) / 60000;
 
-      if(diff < 0){
-        alert("Waktu selesai tidak boleh lebih kecil dari waktu mulai");
-        selesai.value = "";
-        total.value = "";
-        tindakan.value = "";
-        return;
-      }
+  /* ==========================================
+     LOAD PROBLEM
+  ========================================== */
 
-      total.value = diff + " menit";
-      tindakan.value = diff > 15 ? "Pergantian Sparepart" : "Perbaikan";
-    }
+  async function loadProblem(){
 
-    mulai.addEventListener("change", hitungTotal);
-    selesai.addEventListener("change", hitungTotal);
+    const url =
+      "https://opensheet.elk.sh/1q5ZbW1dyHQc2FnNrCnObzbjxdmy0zqTWGvDRbGRkrww/problem";
 
-    async function kirim(){
-      const btn = document.getElementById("kirimBtn");
-      const data = {
-        timestamp: new Date().toISOString(),
-        tanggal: now.toLocaleDateString("id-ID"),
-        nama: user.NAMA || user.nama || "",
-        mesin: mesin.value.trim(),
-        lokasi: lokasi.value,
-        mulai: mulai.value,
-        selesai: selesai.value,
-        total: total.value,
-        problem: problem.value,
-        tindakan: tindakan.value,
-        catatan: catatan.value.trim()
-      };
+    const res =
+      await fetch(url);
 
-      if(!data.mesin || !data.lokasi || !data.mulai || !data.selesai || !data.problem || !data.total){
-        alert("Data belum lengkap");
-        return;
-      }
+    const data =
+      await res.json();
 
-      btn.disabled = true;
-      btn.innerText = "Menyimpan...";
+    const problemEl =
+      document.getElementById("problem");
 
-      try{
-        await saveLaporan(data);
-        alert("Laporan tersimpan ke HP dan Google Spreadsheet");
-        location.href = "home.html";
-      }catch(e){
-        console.error(e);
-        alert("Tersimpan di HP, tapi gagal masuk spreadsheet: " + e.message);
-        location.href = "home.html";
-      }
-    }
+    problemEl.innerHTML =
+      '<option value="">Pilih Problem</option>';
 
-    async function loadLokasi(){
-      const url = "https://opensheet.elk.sh/1K_BsOd1Za3LvLQwcZvfKYXMq54pP0UAMLPJGojz7zjw/lokasi";
-      const res = await fetch(url);
-      const data = await res.json();
-      const lokasiEl = document.getElementById("lokasi");
-      lokasiEl.innerHTML = '<option value="">Pilih Lokasi</option>';
-      data.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.LOKASI;
-        opt.text = row.LOKASI;
-        lokasiEl.appendChild(opt);
-      });
-      new TomSelect("#lokasi");
-    }
+    data.forEach(row => {
 
-    async function loadProblem(){
-      const url = "https://opensheet.elk.sh/1q5ZbW1dyHQc2FnNrCnObzbjxdmy0zqTWGvDRbGRkrww/problem";
-      const res = await fetch(url);
-      const data = await res.json();
-      const problemEl = document.getElementById("problem");
-      problemEl.innerHTML = '<option value="">Pilih Problem</option>';
-      data.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.PROBLEM;
-        opt.text = row.PROBLEM;
-        problemEl.appendChild(opt);
-      });
-      new TomSelect("#problem");
-    }
+      const opt =
+        document.createElement("option");
 
-    window.onload = function(){
-      loadLokasi();
-      loadProblem();
-    };
-  </script>
+      opt.value =
+        row.PROBLEM;
+
+      opt.text =
+        row.PROBLEM;
+
+      problemEl.appendChild(opt);
+
+    });
+
+    new TomSelect("#problem");
+
+  }
+
+
+  /* ==========================================
+     LOAD HALAMAN
+  ========================================== */
+
+  window.onload = function(){
+
+    loadLokasi();
+
+    loadProblem();
+
+  };
+
+</script>
+
 </body>
 </html>
+```
