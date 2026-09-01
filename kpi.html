@@ -379,10 +379,17 @@
 
         <!-- PILIH PERIODE -->
 
-        <select
+        <input
           class="select"
           id="periodFilter"
-        ></select>
+          type="date"
+          aria-label="Pilih tanggal/periode"
+        />
+
+        <span
+          id="weeklyAutoLabel"
+          style="display:none; font-weight:700; padding:10px 14px; border-radius:10px; background:#eef5ff; white-space:nowrap;"
+        ></span>
 
 
         <button
@@ -1283,121 +1290,87 @@ function getYearlyKey(date){
 
 
 /* ==========================================
-   HITUNG NOMOR MINGGU
+   HITUNG NOMOR MINGGU ISO
+   Senin = hari pertama, Minggu = hari terakhir
 ========================================== */
 
 function getWeekNumber(date){
 
-  const d =
-    new Date(
+  if(!(date instanceof Date) || isNaN(date.getTime())){
+    return null;
+  }
 
-      Date.UTC(
+  // Gunakan UTC agar tidak bergeser karena timezone/jam.
+  const d = new Date(Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ));
 
-        date.getFullYear(),
+  // ISO week: Senin=1 ... Minggu=7
+  const dayNum = d.getUTCDay() || 7;
 
-        date.getMonth(),
+  // Pindahkan ke Kamis pada minggu yang sama.
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
 
-        date.getDate()
-
-      )
-
-    );
-
-
-  const dayNum =
-    d.getUTCDay() || 7;
-
-
-  d.setUTCDate(
-
-    d.getUTCDate() +
-    4 -
-    dayNum
-
-  );
-
-
-  const yearStart =
-    new Date(
-
-      Date.UTC(
-
-        d.getUTCFullYear(),
-
-        0,
-
-        1
-
-      )
-
-    );
-
-
-  const weekNo =
-    Math.ceil(
-
-      (
-
-        (
-
-          d -
-          yearStart
-
-        ) /
-
-        86400000
-
-        +
-
-        1
-
-      )
-
-      /
-
-      7
-
-    );
-
+  const isoYear = d.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 
   return {
-
-    year:
-      d.getUTCFullYear(),
-
-    week:
-      weekNo
-
+    year: isoYear,
+    week: weekNo
   };
-
 }
 
 
 /* ==========================================
-   KEY MINGGUAN
+   KEY MINGGUAN ISO
 ========================================== */
 
 function getWeeklyKey(date){
 
-  if(!date){
+  const week = getWeekNumber(date);
 
-    return "";
-
+  if(!week){
+    return '';
   }
 
+  return `${week.year}-W${String(week.week).padStart(2, '0')}`;
+}
 
-  const week =
-    getWeekNumber(date);
 
+/* ==========================================
+   AMBIL SENIN DARI ISO WEEK
+========================================== */
 
-  return
-    `${week.year}-W${String(
-      week.week
-    ).padStart(
-      2,
-      "0"
-    )}`;
+function getMondayFromWeekKey(key){
 
+  const match = String(key || '').match(/^(\d{4})-W(\d{1,2})$/);
+
+  if(!match){
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const week = Number(match[2]);
+
+  if(week < 1 || week > 53){
+    return null;
+  }
+
+  // 4 Januari selalu berada pada ISO week 1.
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;
+
+  // Senin pada ISO week 1.
+  const monday = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - jan4Day + 1);
+
+  // Tambahkan minggu yang dipilih.
+  monday.setUTCDate(monday.getUTCDate() + (week - 1) * 7);
+
+  return monday;
 }
 
 
@@ -1516,18 +1489,30 @@ function yearlyLabel(key){
 
 function weeklyLabel(key){
 
-  const [
-    year,
-    weekText
-  ] =
-    key.split("-W");
+  if(!key){
+    return 'PILIH MINGGU';
+  }
 
+  const monday = getMondayFromWeekKey(key);
 
-  return
-    `MINGGU KE-${Number(
-      weekText
-    )} TAHUN ${year}`;
+  if(!monday){
+    return 'PILIH MINGGU';
+  }
 
+  const sunday = new Date(monday);
+  sunday.setUTCDate(sunday.getUTCDate() + 6);
+
+  const formatDate = (date) => date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+
+  const weekText = key.split('-W')[1];
+  const weekNumber = Number(weekText);
+
+  return `MINGGU KE-${weekNumber} (${formatDate(monday)} - ${formatDate(sunday)})`;
 }
 
 
@@ -1606,60 +1591,37 @@ function getPeriodLabel(
   type
 ){
 
-  if(
-    key === "ALL"
-  ){
-
-    return
-      "SEMUA DATA";
-
+  if(!key){
+    if(type === "daily") return "PILIH TANGGAL";
+    if(type === "weekly") return "PILIH MINGGU";
+    if(type === "monthly") return "PILIH BULAN";
+    if(type === "yearly") return "PILIH TAHUN";
+    return "SEMUA DATA";
   }
 
-
-  if(
-    type === "daily"
-  ){
-
-    return
-      dailyLabel(key);
-
+  if(key === "ALL"){
+    return "SEMUA DATA";
   }
 
-
-  if(
-    type === "weekly"
-  ){
-
-    return
-      weeklyLabel(key);
-
+  if(type === "daily"){
+    return dailyLabel(key);
   }
 
-
-  if(
-    type === "monthly"
-  ){
-
-    return
-      monthlyLabel(key);
-
+  if(type === "weekly"){
+    return weeklyLabel(key);
   }
 
-
-  if(
-    type === "yearly"
-  ){
-
-    return
-      yearlyLabel(key);
-
+  if(type === "monthly"){
+    return monthlyLabel(key);
   }
 
+  if(type === "yearly"){
+    return yearlyLabel(key);
+  }
 
   return key;
 
 }
-
 
 /* ==========================================
    SETUP FILTER PERIODE
@@ -1667,136 +1629,88 @@ function getPeriodLabel(
 
 function setupPeriodOptions(rows){
 
-  const type =
-    document
-    .getElementById(
-      "periodType"
-    )
-    .value;
+  const type = document.getElementById('periodType').value;
+  const input = document.getElementById('periodFilter');
 
-
-  const select =
-    document
-    .getElementById(
-      "periodFilter"
-    );
-
-
-  const currentValue =
-    select.value;
-
-
-  /* SEMUA DATA */
-
-  if(
-    type === "all"
-  ){
-
-    select.innerHTML =
-      `
-      <option value="ALL">
-        Semua Data
-      </option>
-      `;
-
-
-    select.value =
-      "ALL";
-
-
-    select.disabled =
-      true;
-
-
+  if(!input){
     return;
-
   }
 
+  const weeklyLabelEl = document.getElementById('weeklyAutoLabel');
+  if(weeklyLabelEl){
+    weeklyLabelEl.style.display = 'none';
+    weeklyLabelEl.textContent = '';
+  }
 
-  select.disabled =
-    false;
+  // Semua data tidak membutuhkan tanggal.
+  if(type === 'all'){
+    input.type = 'text';
+    input.value = 'ALL';
+    input.disabled = true;
+    input.placeholder = 'Semua Data';
+    input.removeAttribute('min');
+    input.removeAttribute('max');
+    input.removeAttribute('step');
+    return;
+  }
 
+  input.disabled = false;
 
-  /* AMBIL SEMUA PERIODE */
-
-  const periods =
-    [
-
-      ...new Set(
-
-        rows
-
-        .map(
-
-          row =>
-
-            getPeriodKey(
-              row,
-              type
-            )
-
-        )
-
-        .filter(Boolean)
-
-      )
-
-    ]
-
+  // Ambil periode terbaru hanya sebagai nilai awal.
+  // User tetap bisa memilih tanggal/minggu/bulan/tahun apa pun.
+  const periods = (Array.isArray(rows) ? rows : [])
+    .map(row => getPeriodKey(row, type))
+    .filter(Boolean)
     .sort()
-
     .reverse();
 
+  const latest = periods[0] || '';
 
-  select.innerHTML =
-    periods
+  if(type === 'daily'){
+    input.type = 'date';
+    input.value = latest;
+    input.removeAttribute('min');
+    input.removeAttribute('max');
+    input.removeAttribute('step');
+    input.placeholder = '';
 
-    .map(
-      key => {
+  }else if(type === 'weekly'){
+    /*
+       MINGGUAN OTOMATIS:
+       User tidak perlu memilih minggu secara manual.
+       Sistem memakai minggu terbaru yang tersedia di data.
+       Jika data kosong, gunakan minggu berjalan.
+    */
+    input.type = 'hidden';
+    input.value = latest || getWeeklyKey(new Date());
+    input.removeAttribute('min');
+    input.removeAttribute('max');
+    input.removeAttribute('step');
+    input.placeholder = '';
+    input.disabled = false;
 
-        return `
+    const weeklyLabelEl = document.getElementById('weeklyAutoLabel');
+    if(weeklyLabelEl){
+      weeklyLabelEl.style.display = 'inline-block';
+      weeklyLabelEl.textContent = weeklyLabel(input.value);
+    }
 
-          <option
-            value="${key}"
-          >
+  }else if(type === 'monthly'){
+    input.type = 'month';
+    input.value = latest;
+    input.removeAttribute('min');
+    input.removeAttribute('max');
+    input.removeAttribute('step');
+    input.placeholder = '';
 
-            ${getPeriodLabel(
-              key,
-              type
-            )}
-
-          </option>
-
-        `;
-
-      }
-    )
-
-    .join("");
-
-
-  /* DEFAULT PERIODE TERBARU */
-
-  if(
-
-    currentValue &&
-
-    periods.includes(
-      currentValue
-    )
-
-  ){
-
-    select.value =
-      currentValue;
-
-  }else{
-
-    select.value =
-      periods[0] || "";
-
+  }else if(type === 'yearly'){
+    input.type = 'number';
+    input.min = '2000';
+    input.max = '2100';
+    input.step = '1';
+    input.value = latest;
+    input.placeholder = 'Contoh: 2026';
   }
-
 }
 
 
@@ -1814,12 +1728,25 @@ function filterByPeriod(rows){
     .value;
 
 
-  const selected =
+  let selected =
     document
     .getElementById(
       "periodFilter"
     )
     .value;
+
+  /* Mingguan selalu otomatis memakai minggu terbaru yang ada di data. */
+  if(type === "weekly"){
+    const weeklyPeriods = (Array.isArray(rows) ? rows : [])
+      .map(row => getPeriodKey(row, "weekly"))
+      .filter(Boolean)
+      .sort()
+      .reverse();
+
+    selected = weeklyPeriods[0] || getWeeklyKey(new Date());
+
+    document.getElementById("periodFilter").value = selected;
+  }
 
 
   if(
